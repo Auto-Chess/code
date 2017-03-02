@@ -115,7 +115,7 @@ you changes (Commits) up to our server and contact Noah on Slack.
 This section describes how to get your computer set up so you can start coding.
 
 ## Summary
-You will have to install Python version 3.6. This is aviable on OSX, Windows, and Linux (Techinically what our Raspberry Pi is running).
+You will have to install Python version 3.6. This is available on OSX, Windows, and Linux (Techinically what our Raspberry Pi is running).
 
 Look at the section below which referes to your operating system:
 
@@ -135,13 +135,13 @@ Look at the section below which referes to your operating system:
 	- If it doesn't ask for help in Slack
 	
 ## Steps for Windows
-- 1. Go to [The Python 3.6 Download Page](https://www.python.org/downloads/release/python-360/)
-	- Scroll to the "Files" section all the way at the bottom
+- Go to [The Python 3.6 Download Page](https://www.python.org/downloads/release/python-360/)
+    - Scroll to the "Files" section all the way at the bottom
     - Click the link that says "Windows x86-64 executable installer"
-- 2. Run the file you download and follow the installer instructions
-- 3. Congrats your done!
+- Run the file you download and follow the installer instructions
+- Congrats your done!
 
 ## Steps for Linux
-- 1. It should be installed under the name `python3`.
+- It should be installed under the name `python3`.
     - At least on our Raspberry Pi
-- 2. If its not, sorry dude your fault for using Linux. Figure it out.
+- If its not, sorry dude your fault for using Linux. Figure it out.
