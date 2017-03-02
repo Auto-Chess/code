@@ -71,6 +71,9 @@ for Commits that it doesn't have.
 
 This way we can get other peoples work.
 
+It is a good idea to Pull from the server often just incase someone has done any work 
+on the files you are editing.
+
 #### Command Line
 Run: `git pull origin <branch>`
 
