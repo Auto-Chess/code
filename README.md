@@ -113,6 +113,10 @@ that describes what you will be changing/creating/fixing/ect.
 Make all your Commits on this Branch. Once you are done with your feature make sure you have Pushed all 
 you changes (Commits) up to our server and contact Noah on Slack.
 
+## Running our code
+If you have completed the setup step then simply open a terminal up in the directory of the `main.py` file 
+and run `python ./main.py`.
+
 
 # Setup
 This section describes how to get your computer set up so you can start coding.
