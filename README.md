@@ -120,7 +120,7 @@ You will have to install Python version 3.6. This is available on OSX, Windows, 
 Look at the section below which referes to your operating system:
 
 ## Steps For OSX
-- 1. Open the Terminal application and type:
+- Open the Terminal application and type:
     - `xcode-select --install` and hit enter
         - This will install some useful tools for writting code to your system
         - This might take a bit of time
@@ -129,12 +129,13 @@ Look at the section below which referes to your operating system:
 		- This will install a tool which helps us install other development tools
     - Then `brew install python3`
 		- This will install Python version 3.6
-- 2. That should be it
-- 2. Check everything worked correctly by typing `python --version` in the terminal
+- That should be it
+- Check everything worked correctly by typing `python --version` in the terminal
     - This should say something like `Python 3.6.0`
 	- If it doesn't ask for help in Slack
 	
 ## Steps for Windows
+
 - Go to [The Python 3.6 Download Page](https://www.python.org/downloads/release/python-360/)
     - Scroll to the "Files" section all the way at the bottom
     - Click the link that says "Windows x86-64 executable installer"
@@ -142,6 +143,7 @@ Look at the section below which referes to your operating system:
 - Congrats your done!
 
 ## Steps for Linux
+
 - It should be installed under the name `python3`.
     - At least on our Raspberry Pi
 - If its not, sorry dude your fault for using Linux. Figure it out.
