@@ -101,7 +101,7 @@ Click the Branch button in the top bar and enter your branch name.
 Let Noah merge your created branch back in with master.
 
 ## Using Git to code
-You will be assigned individual tasks. 
+You will be assigned individual tasks on BitBucket.org. 
 
 Before you do anything make sure you are on the "master" Git Branch and have the most recent code.
 You can do this by switching branches (Different depending on what you use for Git) and then Pulling. 
