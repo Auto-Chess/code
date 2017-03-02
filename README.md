@@ -6,6 +6,8 @@ We will use Python version 3.6.
 This README document will provide you with all steps necessary to get up and coding.
 
 # Writting code
+If you haven't first read the Setup section below.
+
 Since we will all be basically editing the same file (`main.py`) we have to use some sort of technique to make sure we do not 
 step on each other's toes. You could imagine the kind of problems we would have if 3 of us tried to change the same line of the 
 same file all at once. It wouldn't really work too well. 
