@@ -14,11 +14,8 @@ included in Python by default or downloaded from the internet.
 """
 
 def prompt_user_for_input():
-    print("prompt_user_for_input")
-    print("=================================")
-    print("This function prompts the user on the screen to input their move.")
-    print("This is done by handing some text which asks the user to the LCD text display interface")
-    print("")
+    print("Welcome to Auto Chess")
+    print('Enter inital and final position: ')
 
 
 def gather_user_input():
