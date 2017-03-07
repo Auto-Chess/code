@@ -49,12 +49,7 @@ def get_opponent_move_from_library():
     return "Fake opponent initial move", "Fake opponent final move"
 
 def show_opponent_move(initial_pos, final_pos):
-    print("show_opponent_move")
-    print("=================================")
-    print("1. Hand Initial and Final Piece Positions to LED Interface.")
-    print("2. Hand Initial and Final Piece Positions to LCD text display interface")
-    print("")
-
+    print("Opponent move \"{}\" => \'{}\"".format(initial_pos, final_pos))
 
 """
 Now that we have defined all our functions above we are going to

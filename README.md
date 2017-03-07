@@ -5,79 +5,108 @@ We will use Python version 3.6.
 
 This README document will provide you with all steps necessary to get up and coding.
 
-# Writting code
-If you haven't first read the Setup section below.
+# Witting code
+If you haven't, first read the [Setup](#markdown-header-setup) section below.
 
-Since we will all be basically editing the same file (`main.py`) we have to use some sort of technique to make sure we do not 
-step on each other's toes. You could imagine the kind of problems we would have if 3 of us tried to change the same line of the 
-same file all at once. It wouldn't really work too well. 
+Since we will all be basically editing the same file (`main.py`) we have to use some sort of technique to make sure we 
+do not step on each other's toes. You could imagine the kind of problems we would have if 3 of us tried to change the 
+same line of the same file all at once. It wouldn't really work too well. 
 
-Luckily Git (That seemingly useless and annoying tool) helps us solve exactly the problem I described above. Git's main feature 
-is that it allows many people to work on the same piece of code (From 4-5 people to thousands in a company). 
+Luckily Git (That seemingly useless and annoying tool) helps us solve exactly the problem I described above. Git's main 
+feature is that it allows many people to work on the same piece of code (From 4-5 people to thousands in a company). 
 
 ## Git Overview
-If you feel like you already understand Git, skip.
+If you feel like you already understand Git, skip this entire section.
+This section will provide a general overview of what Git is and how we will use to help code our project.    
 
 Git is a tool that lets you track changes made to a files. It can also be used to back up code in the Cloud 
-("The Cloud" is just another name for someone elses computer). 
+("The Cloud" is just another name for someone else's computer). 
 
 ### File Tracking
 You have to explicitly tell Git which files to track changes to. 
 If you don't tell Git to track a file then it won't. This might seem obvious 
 but you have to keep this in mind. 
 
-#### Command Line
-This can be done on the command line via `git add <filename>`.
+###### Command Line instructions
+You can tell Git to Track a file by typing:
+```bash
+git add <filename>
+```
+in your command line and hitting enter. 
 
-#### Source Tree
+Replace `<filename>` with the file you want Git to track
+
+###### Source Tree instructions
 In SouceTree simply click the Checkbox next to the file (I don't actually have SourceTree so hmu if I'm wrong).
 
 ### Commits
 A "Commit" in Git is a snapshot of the changes made to files Tracked by Git at a specific time. A series of 
-Git Commits can show the history of a file (The changes made, when, and who).
+Git Commits can show the history of a file.
 
-Along with a Commit you usually also include a "Commit Message". This message describes the changes 
-you have made to the files Git is tracking since the last Commit you made. Try to keep this message 
-short and descriptive (Ex., "Fixed issues with LEDs blinking too fast", "Programmed game loop to use LCD")
+A Git Commit consists of 2 parts:
+- The first part is changes to any files Tracked by Git
+- The second part is a short message that describes the changes in the first part
+    - This should be **short**, like max **2 words**
+    - Try to be descriptive (ex., "Fixed LED blinking issue" or "Programmed game loop to use LCD")
 
-#### Command Line
-After you have added some files for Git to Track you can Commit changes made to those files with: `git commit -m <Commit Message>`
+###### Command Line instructions
+After you make some changes to files Git is tracking you can Commit those changes. You do this by typing:
+```bash
+git commit -m "<Commit Message>"
+```
+in your command line and hitting enter.
 
-#### Source Tree
-Once you have added some files for Git to Track you can Commit changes by clicking the "Commit" button on the top of the screen.
-You will then be brough to a page where you can type your commit message. 
+The `-m` tells the Git tool that the following text is your *Commit Message*.  
+Replace `<Commit Message>` with your short and clear commit message (Don't forget to surround with quotes)
+
+###### Source Tree instructions
+After you make some changes to files Git is tracking you can Commit those changes. In SourceTree you do this by clicking 
+the "Commit" button in the upper bar. You will then be able to type your Commit Message into a box located in the lower 
+left-ish part of your screen.
 
 ### Pushing
 Earlier I mentioned how Git could be used to backup code to "The Cloud". 
-The way we will do that is by "Pushing" the Commits (Commits = Record of changes we made) 
-to another server.
+The way we will do that is by "Pushing" the Commits (Commits = Record of changes we made) to another server.
 
 When you Push your Commits to a server it will see that it doesn't have those Commits 
 and update its version to reflect the changes you made. That way if your computer dies it 
 won't be a huge problem because the server will have a copy of your work.
 
-#### Command Line
-Type `git push origin <branch>`.
+**ALWAYS Commit *then* Pull** (Don't worry Pulling will be explained in the next section) before pushing.
 
-`<branch>` will usually be `master`. See Branches section for more information.
+###### Command Line instructions
+Type:
+```bash
+git push origin <branch>
+```
+into your terminal and hit enter.
 
-#### Source Tree
+`origin` is the name of the server you are Pushing your commit's to.
+`<branch>` is the name of the Branch you are pushing (Don't worry Branches will be explained after the next section)
+
+###### Source Tree instructions
 Click the Push button in the top bar.
 
 ### Pulling
-Just like we can Push our Commits up to a server, we can also Pull other's Commits down 
+Just like we can Push our Commits up to a server, we can also Pull other people's Commits  
 from a server. When we Pull from a server in Git all our computer does is ask the server 
-for Commits that it doesn't have. 
+for Commits that we do not have. 
 
 This way we can get other peoples work.
 
-It is a good idea to Pull from the server often just incase someone has done any work 
-on the files you are editing.
+**ALWAYS Commit *then* Pull** before pushing. Do this just in case anybody has done any work since the last 
+time you Pulled (The chances that someone has are quite high).
 
-#### Command Line
-Run: `git pull origin <branch>`
+###### Command Line instructions
+Type:
+```bash
+git pull origin <branch>
+```
+into your terminal and hit enter.
 
-#### Source Tree
+Where `<branch>` is the branch you want to Pull for.
+
+###### Source Tree instructions
 Click the Pull button in the top bar.
 
 ### Branches
@@ -92,11 +121,11 @@ This way while you are making your changes other people won't have to deal with 
 changing files until you have finished. Once you have completed your changes you 
 "Merge" (Aka Combine) your Branch back in with the "master" branch.
 
-#### Command Line
+###### Command Line instructions
 Type `git checkout -b <branch name>` to create a branch.
 Let Noah merge your created branch back in with master.
 
-#### Source Tree
+###### Source Tree instructions
 Click the Branch button in the top bar and enter your branch name.
 Let Noah merge your created branch back in with master.
 
@@ -140,6 +169,7 @@ Look at the section below which referes to your operating system:
 - Check everything worked correctly by typing `python --version` in the terminal
     - This should say something like `Python 3.6.0`
 	- If it doesn't ask for help in Slack
+- Now that you are done go back up to the [Writting Code section](#markdown-header-writting-code)
 	
 ## Steps for Windows
 
@@ -148,9 +178,17 @@ Look at the section below which referes to your operating system:
     - Click the link that says "Windows x86-64 executable installer"
 - Run the file you download and follow the installer instructions
 - Congrats your done!
+- Now that you are done go back up to the [Writting Code section](#markdown-header-writting-code)
 
 ## Steps for Linux
+The steps depend on the distribution of Linux you are running.
 
-- It should be installed under the name `python3`.
-    - At least on our Raspberry Pi
-- If its not, sorry dude your fault for using Linux. Figure it out.
+- If you are using Ubuntu Python 3.6 should already be installed under the name `python3`
+    - If it is not installed install it with the `apt-get install python3` command (You may need to run this with `sudo`)
+    - Our Raspberry Pi runs a version of Ubuntu called "Raspbian"
+- If you are using Arch Linux you can install Python 3.6 under the official package `python`
+    - If it is not installed install it with `pacman -S python` (You may need to run this with `sudo`)
+- If you Linux distribution is not listed above:
+    - Search around and see if your distribution has an official package to install
+    - Otherwise go to the [Python 3.6 webpage](https://www.python.org/downloads/release/python-360/) and download the best file and install
+- Now that you are done go back up to the [Writting Code section](#markdown-header-writting-code)
