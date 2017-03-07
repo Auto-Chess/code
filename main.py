@@ -46,6 +46,9 @@ def get_opponent_move_from_library():
     print("3. This function should return the Opponent's initial and final move")
     print("")
 
+    print("Here is where the third party chess interface would ask the third party chess library for the oppponent's move")
+    print("Opponent's move will then be given to the third party chess interface")
+
     return "Fake opponent initial move", "Fake opponent final move"
 
 def show_opponent_move(initial_pos, final_pos):
