@@ -22,10 +22,8 @@ def prompt_user_for_input():
 
 
 def gather_user_input():
-    print("gather_user_input")
-    print("=================================")
-    print("This function gets the user entered initial and final piece positions and returns them")
-    print("")
+    usrInpt = input()
+    return usrInpt
 
     return "Fake user initial position", "Fake user final position"
 
