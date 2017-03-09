@@ -15,18 +15,13 @@ included in Python by default or downloaded from the internet.
 
 
 def prompt_user_for_input():
-    print("prompt_user_for_input")
-    print("=================================")
-    print("This function prompts the user on the screen to input their move.")
-    print("This is done by handing some text which asks the user to the LCD text display interface")
-    print("")
+    print("Welcome to Auto Chess")
+    print('Enter inital and final position: ')
 
 
 def gather_user_input():
-    print("gather_user_input")
-    print("=================================")
-    print("This function gets the user entered initial and final piece positions and returns them")
-    print("")
+    usrInpt = input()
+    return usrInpt
 
     return "Fake user initial position", "Fake user final position"
 
@@ -49,22 +44,13 @@ def give_to_chess_library(initial_pos, final_pos):
 
 
 def get_opponent_move_from_library():
-    print("get_opponent_move_from_library")
-    print("=================================")
-    print("1. Use third party chess interface to ask third party Chess library for opponent's move")
-    print("2. Opponent's move will be given to third party Chess interface")
-    print("3. This function should return the Opponent's initial and final move")
-    print("")
+    print("Here is where the third party chess interface would ask the third party chess library for the oppponent's move")
+    print("Opponent's move will then be given to the third party chess interface")
 
     return "Fake opponent initial move", "Fake opponent final move"
 
 def show_opponent_move(initial_pos, final_pos):
-    print("show_opponent_move")
-    print("=================================")
-    print("1. Hand Initial and Final Piece Positions to LED Interface.")
-    print("2. Hand Initial and Final Piece Positions to LCD text display interface")
-    print("")
-
+    print("Opponent move \"{}\" => \'{}\"".format(initial_pos, final_pos))
 
 """
 Now that we have defined all our functions above we are going to
