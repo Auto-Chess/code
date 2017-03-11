@@ -1,7 +1,11 @@
 class GameLoopEntity():
     def __init__(self):
+        self.welcomed = False
+        pass
     def prompt_user_for_input(self):
-        print("Welcome to Auto Chess")
+        if self.welcomed == False:
+            self.welcomed = True
+            print("Welcome to Auto Chess")
         print('Enter inital and final position: ')
 
     def gather_user_input(self):
@@ -27,11 +31,10 @@ class GameLoopEntity():
         print("")
 
     def get_opponent_move_from_library(self):
-        print(
-        "Here is where the third party chess interface would ask the third party chess library for the oppponent's move")
+        print("Here is where the third party chess interface would ask the third party chess library for the oppponent's move")
         print("Opponent's move will then be given to the third party chess interface")
 
         return "Fake opponent initial move", "Fake opponent final move"
 
     def show_opponent_move(self,initial_pos, final_pos):
-        print("Opponent move \"{}\" => \'{}\"".format(initial_pos, final_pos))
+        print("Opponent move \"{}\" => \"{}\"".format(initial_pos, final_pos))
