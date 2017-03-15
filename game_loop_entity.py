@@ -2,29 +2,23 @@ class GameLoopEntity():
     def __init__(self):
         self.welcomed = False
         pass
+
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
             print("Welcome to Auto Chess")
-        print('Enter inital and final position: ')
+        print("Enter initial then final position: ")
 
     def gather_user_input(self):
-        usrInpt = input()
-        return usrInpt
-
-        return "Fake user initial position", "Fake user final position"
+        initial = input("Initial position:")
+        final = input("Final position:")
+        return initial, final
 
     def give_to_chess_library(self,initial_pos, final_pos):
-        print("give_to_chess_library")
-        print("=================================")
-        print("initial_pos is where the piece was.")
-        print("final_pos is the new position of the piece.")
-        print("1. Give this information to the third party chess library.")
-        print("2. If anything goes wrong return an error, otherwise return nothing")
         try:
             # third_party_library_input(initial_pos, final_pos)
             # Remove pass when ready (obviously)
-            pass
+            print("Here we would give library move: \"{}\" => \"{}\"".format(initial_pos, final_pos))
         except ValueError as err:
             # Or catch whatever error type the 3rd party API throws
             print("The 3rd party library was unable to receive input.")
