@@ -8,7 +8,7 @@ Okay are you ready? Let's go.
 
 import collections
 
-class Chessbrary():
+class ChessLibrary():
     
     def handOff(self, moveX, moveY):
         #TODO: figure out how to "give" the library a move. Where does the library exist?
