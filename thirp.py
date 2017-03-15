@@ -10,16 +10,14 @@ import collections
 
 class Chessbrary():
     
-    @staticmethod
-    def handOff(moveX, moveY):
+    def handOff(self, moveX, moveY):
         #TODO: figure out how to "give" the library a move. Where does the library exist?
         #How does Chessbrary have access to it?
     
         sentence = 'Giving {} and {} to chess library.'.format(moveX, moveY)
         print(sentence)
         
-    @staticmethod
-    def getMove():
+    def getMove(self):
         #TODO: figure out how the library will be "asked" for a move. By what means does
         #it take input? Doesn't having this class kind of negate the purpose of the other
         #method I wrote? Should exception handling be done within here?
