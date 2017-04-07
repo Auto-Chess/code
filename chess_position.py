@@ -1,7 +1,7 @@
 class ChessPosition:
-    def __init__(self, row, col):
-        self.row = row
+    def __init__(self, col, row):
         self.col = col
+        self.row = row
 
     @property
     def row(self):
