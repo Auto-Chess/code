@@ -1,13 +1,15 @@
+from chess_move import ChessMove
+from lcd_interface import LCDInterface
 class GameLoopEntity():
     def __init__(self):
         self.welcomed = False
-        pass
+        self.lcd_interface = LCDInterface()
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
-            print("Welcome to Auto Chess")
-        print("Enter initial then final position: ")
+            self.lcd_interface.display("Welcome to Auto Chess","","")
+        self.lcd_interface.display("Enter initial then final position: ")
 
     def gather_user_input(self):
         initial = input("Initial position:")
