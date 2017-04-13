@@ -1,3 +1,4 @@
+from chess_position import ChessPosition
 from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
@@ -12,10 +13,18 @@ class GameLoopEntity():
             self.lcd_interface.display("Welcome to Auto Chess","","")
         self.lcd_interface.display("Enter initial then final position: ")
 
+
     def gather_user_input(self):
-        initial = input("Initial position:")
-        final = input("Final position:")
-        return initial, final
+        initial_input = input("Initial position:")
+        initial_col = initial_input[1]
+        initial_row = initial_input[0]
+        initial_pos = ChessPosition(initial_col, initial_row)
+        finalInput = input("Final position:")
+        final_col = final_input[1]
+        final_row = final_input[0]
+        final_pos = ChessPosition(final_col, final_row)
+        move = ChessMove(initial_pos, final_pos)
+        return move
 
     def give_to_chess_library(self,initial_pos, final_pos):
         try:
