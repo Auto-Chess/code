@@ -1,18 +1,16 @@
-from code import chess_move
-from code import chess_position
+from chess_move import ChessMove
+from chess_position import ChessPosition
 
-class ChessLibrary:
+def handoff(self, move):
+    #Give a ChessMove object to the third-party library
+    return 0
 
-    def handoff(self, move):
-        #use whatever method 3rd party library to hand it information from the object "move", which
-        #is a ChessMove object
-        return 0;
+def getmove(self):
+    #Asking Chess Library for a move, and storing it into a ChessPosition object
+    #In this example, the original pos is 0,0 and the final is 1,1
+    init = ChessPosition(0, 0)
+    final = ChessPosition(1, 1)
 
-    def getmove(self):
-        sentence = 'Asking library for AI move... Done. Returning (x), (y)'
-        print(sentence)
-        x = 0
-        y = 0
+    return ChessMove(init, final)
 
-        move = ChessMove(x, y)
-        return move
+
