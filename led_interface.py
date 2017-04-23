@@ -1,9 +1,11 @@
 import collections
+from chess_position import ChessPosition
+from chess_move import ChessMove
 
 class LedInterface():
 
     def __init__(self):
-        pass
+       pass
 
     def turn_on_led(self, position):
         print("Takes a chess coordinate pair (position) to turn on an LED to show initial position")
