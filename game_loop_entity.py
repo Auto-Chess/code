@@ -1,34 +1,47 @@
+from chess_position import ChessPosition
+from led_interface import LedInterface
+from chess_move import ChessMove
+from lcd_interface import LCDInterface
 class GameLoopEntity():
     def __init__(self):
         self.welcomed = False
-        pass
+        self.lcd_interface = LCDInterface()
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
-            print("Welcome to Auto Chess")
-        print("Enter initial then final position: ")
+            self.lcd_interface.display("Welcome to Auto Chess","","")
+        self.lcd_interface.display("Enter initial then final position: ")
+
 
     def gather_user_input(self):
-        initial = input("Initial position:")
-        final = input("Final position:")
-        return initial, final
+        initial_input = input("Initial position:")
+        initial_col = initial_input[1]
+        initial_row = initial_input[0]
+        initial_pos = ChessPosition(initial_col, initial_row)
+        finalInput = input("Final position:")
+        final_col = final_input[1]
+        final_row = final_input[0]
+        final_pos = ChessPosition(final_col, final_row)
+        move = ChessMove(initial_pos, final_pos)
+        return move
 
     def give_to_chess_library(self,initial_pos, final_pos):
         try:
-            # third_party_library_input(initial_pos, final_pos)
-            # Remove pass when ready (obviously)
-            print("Here we would give library move: \"{}\" => \"{}\"".format(initial_pos, final_pos))
+            chessMove = ChessMove(initial_pos, final_pos)
+            self.chess_library.handOff("","")
+            #TODO when chess library class is made
+
         except ValueError as err:
             # Or catch whatever error type the 3rd party API throws
-            print("The 3rd party library was unable to receive input.")
-        print("")
+            self.lcd_interface.display("The 3rd party library was unable to receive input.", "", "")
+
 
     def get_opponent_move_from_library(self):
-        print("Here is where the third party chess interface would ask the third party chess library for the oppponent's move")
-        print("Opponent's move will then be given to the third party chess interface")
+        opponentMove = self.chess_library.getMove()
 
-        return "Fake opponent initial move", "Fake opponent final move"
+        return opponentMove
 
     def show_opponent_move(self,initial_pos, final_pos):
-        print("Opponent move \"{}\" => \"{}\"".format(initial_pos, final_pos))
+        self.led_interface.turn_on_led(initial_pos)
+        self.led_interface.start_blinking_led(final_pos)
