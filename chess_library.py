@@ -21,10 +21,3 @@ def get_move():
     final = ChessPosition(1, 1)
 
     return ChessMove(init, final)
-
-# Test code for hand_off
-invite = ChessPosition("e", 2)
-finale = ChessPosition("e", 4)
-x = ChessMove(invite, finale)
-
-hand_off(x)
