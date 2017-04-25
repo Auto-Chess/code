@@ -15,6 +15,8 @@ class GameLoopEntity():
 
 
     def gather_user_input(self):
+        initial_pos = None
+        final_pos = None
         gettingInitialPosition = True
         while gettingInitialPosition == True:
             initial_input = input("Initial position:")
