@@ -15,6 +15,7 @@ class GameLoopEntity():
 
 
     def gather_user_input(self):
+        gettingInitialPosition = True
         while gettingInitialPosition == True:
             initial_input = input("Initial position:")
             initial_col = initial_input[1]
@@ -26,14 +27,15 @@ class GameLoopEntity():
             except ValueError as err:
                 self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
 
-        while gettingFinalPosition == True:
+        gettingFinalPosition = True
+        while gettingFinalPosition = True:
             final_input = input("Final position:")
             final_col = final_input[1]
             final_row = final_input[0]
 
             try:
                 final_pos = ChessPosition(final_col, final_row)
-                gettingFinalPosition == True:
+                gettingFinalPosition == False
             except ValueErroras err:
                 self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
 
