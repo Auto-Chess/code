@@ -28,7 +28,7 @@ class GameLoopEntity():
                 self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
 
         gettingFinalPosition = True
-        while gettingFinalPosition = True:
+        while gettingFinalPosition == True:
             final_input = input("Final position:")
             final_col = final_input[1]
             final_row = final_input[0]
@@ -36,7 +36,7 @@ class GameLoopEntity():
             try:
                 final_pos = ChessPosition(final_col, final_row)
                 gettingFinalPosition == False
-            except ValueErroras err:
+            except ValueErroras as err:
                 self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
 
 
