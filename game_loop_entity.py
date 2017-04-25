@@ -15,22 +15,37 @@ class GameLoopEntity():
 
 
     def gather_user_input(self):
-        initial_input = input("Initial position:")
-        initial_col = initial_input[1]
-        initial_row = initial_input[0]
-        initial_pos = ChessPosition(initial_col, initial_row)
-        if self.col and self.row == True:
-            else:
-            print("prompt user for input {},".format(self._screentxt))
+        while gettingInitialPosition == True:
+            initial_input = input("Initial position:")
+            initial_col = initial_input[1]
+            initial_row = initial_input[0]
 
-        finalInput = input("Final position:")
+            try:
+                initial_pos = ChessPosition(initial_col, initial_row)
+                gettingInitialPosition = False
+            except ValueError as err:
+                self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
+
+        while gettingFinalPosition == True:
+        final_input = input("Final position:")
         final_col = final_input[1]
         final_row = final_input[0]
-        final_pos = ChessPosition(final_col, final_row)
+
+
+            try:
+                final_pos = ChessPosition(final_col, final_row)
+                gettingFinalPosition == True:
+            except ValueErroras err:
+            self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
+
+
+
+
+
+
         move = ChessMove(initial_pos, final_pos)
-        if self.col and self.row == True:
-            else:
-            print("prompt user for input {},".format(self._screentxt))
+
+
         return move
 
     def give_to_chess_library(self,initial_pos, final_pos):
