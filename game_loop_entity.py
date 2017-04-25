@@ -35,10 +35,9 @@ class GameLoopEntity():
 
             try:
                 final_pos = ChessPosition(final_col, final_row)
-                gettingFinalPosition == False
-            except ValueErroras as err:
+                gettingFinalPosition = False
+            except ValueError as err:
                 self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
-
 
         move = ChessMove(initial_pos, final_pos)
         return move
