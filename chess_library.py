@@ -1,16 +1,30 @@
 from chess_move import ChessMove
 from chess_position import ChessPosition
 
-def handoff(self, move):
-    #Give a ChessMove object to the third-party library
-    return 0
+import chess
 
-def getmove(self):
-    #Asking Chess Library for a move, and storing it into a ChessPosition object
-    #In this example, the original pos is 0,0 and the final is 1,1
+# This object is created purely for testing purposes as of now
+board = chess.Board()
+
+
+# Give a ChessMove object to the third-party library
+def hand_off(move):
+    if isinstance(move, ChessMove):
+        board.parse_uci(move.__str__())
+    else:
+        raise TypeError("Parameter of hand_off must be of type ChessMove")
+
+
+# Asks Chess Library for a move, and returns it as a ChessMove object
+def get_move():
     init = ChessPosition(0, 0)
     final = ChessPosition(1, 1)
 
     return ChessMove(init, final)
 
+# Test code for hand_off
+invite = ChessPosition("e", 2)
+finale = ChessPosition("e", 4)
+x = ChessMove(invite, finale)
 
+hand_off(x)
