@@ -19,11 +19,18 @@ class GameLoopEntity():
         initial_col = initial_input[1]
         initial_row = initial_input[0]
         initial_pos = ChessPosition(initial_col, initial_row)
+        if self.col and self.row == True:
+            else:
+            print("prompt user for input {},".format(self._screentxt))
+
         finalInput = input("Final position:")
         final_col = final_input[1]
         final_row = final_input[0]
         final_pos = ChessPosition(final_col, final_row)
         move = ChessMove(initial_pos, final_pos)
+        if self.col and self.row == True:
+            else:
+            print("prompt user for input {},".format(self._screentxt))
         return move
 
     def give_to_chess_library(self,initial_pos, final_pos):
