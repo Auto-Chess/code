@@ -5,25 +5,26 @@ class ChessPosition:
 
     @property
     def row(self):
-        return self._row
+        return self.row
 
     @row.setter
     def row(self, value):
         if (value >= 1) and (value <= 8):
-            self._row = value
+            self.row = value
         else:
             raise ValueError("Value must be between 1 and 8, was: {}".format(value))
 
-
-
     @property
     def col(self):
-        return self._col
+        return self.col
 
-    @column.setter
-    def col (self, value):
+    @col.setter
+    def col(self, value):
         value = value.lower()
         if (value >= "a") and (value <= "h"):
-            self._col = value
+            self.col = value
         else:
             raise ValueError("Value must be between a and h, was: {}".format(value))
+
+    def __str__(self):
+        return self.col + str(self.row)
