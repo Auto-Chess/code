@@ -2,10 +2,12 @@ from chess_position import ChessPosition
 from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
+import chess_library import ChessLibrary
 class GameLoopEntity():
     def __init__(self):
         self.welcomed = False
         self.lcd_interface = LCDInterface()
+        self.chess_library = ChessLibrary()
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
@@ -54,6 +56,7 @@ class GameLoopEntity():
             # Or catch whatever error type the 3rd party API throws
             self.lcd_interface.display("The 3rd party library was unable to receive input.", "", "")
 
+        self.chess_library.handOff(chessMove)
 
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.getMove()
