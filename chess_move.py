@@ -4,4 +4,6 @@ class ChessMove:
         self.final_pos = final_pos
 
     def __eq__(self, other):
-        return self.init_pos == other.init_pos and self.final_pos == other.final_pos
+        if isinstance(other, self.__class__):
+            return self.init_pos == other.init_pos and self.final_pos == other.final_pos
+        return False

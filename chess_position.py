@@ -30,4 +30,6 @@ class ChessPosition:
 
 
     def __eq__(self, other):
-        return self.row == other.row and self.col == other.col
+        if isinstance(other, self.__class__):
+            return self.row == other.row and self.col == other.col
+        return False
