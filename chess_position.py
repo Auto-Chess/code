@@ -20,10 +20,14 @@ class ChessPosition:
     def col(self):
         return self._col
 
-    @column.setter
+    @col.setter
     def col (self, value):
         value = value.lower()
         if (value >= "a") and (value <= "h"):
             self._col = value
         else:
             raise ValueError("Value must be between a and h, was: {}".format(value))
+
+
+    def __eq__(self, other):
+        return self.row == other.row and self.col == other.col
