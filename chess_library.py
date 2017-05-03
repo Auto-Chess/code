@@ -19,8 +19,17 @@ def hand_off(move):
             engine.position(board)
         except ValueError:
             print('\033[91m' + "Invalid move: " + move.__str__() + "!" + '\033[0m')
+            return False
+    elif isinstance(move, str):
+        try:
+            board.push_uci(move)
+            engine.position(board)
+        except ValueError:
+            print('\033[91m' + "Invalid move: " + move + "!" + '\033[0m')
+            return False
     else:
-        raise TypeError("Parameter of hand_off must be of type ChessMove")
+        raise TypeError("Parameter of hand_off must be of type ChessMove or String")
+    return True
 
 
 # Asks Chess Library for a move, pushes it to board, and returns it as a ChessMove object
@@ -37,3 +46,17 @@ def get_move():
     engine.position(board)
 
     return ChessMove(init, final)
+
+
+# Self explanatory
+def is_game_over():
+    return board.is_game_over();
+
+
+# Test code. Very rough but it works
+while not is_game_over():
+    x = get_move()
+    print(x.__str__())
+    y = False
+    while not y:
+        y = hand_off(input("Enter move: "))
