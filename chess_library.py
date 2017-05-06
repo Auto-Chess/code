@@ -7,7 +7,7 @@ import chess.uci
 board = chess.Board()
 
 # Setup Stockfish engine
-engine = chess.uci.popen_engine("/stockfish_8_x32")
+engine = chess.uci.popen_engine("stockfish_8_x32")
 engine.uci()
 
 
