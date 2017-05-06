@@ -8,6 +8,7 @@ class GameLoopEntity():
         self.welcomed = False
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
+        self.led_interface = LedInterface()
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
@@ -55,10 +56,10 @@ class GameLoopEntity():
 
 
     def get_opponent_move_from_library(self):
-        opponentMove = self.chess_library.getMove()
+        opponentMove = self.chess_library.get_move()
 
         return opponentMove
 
     def show_opponent_move(self,initial_pos, final_pos):
         self.led_interface.turn_on_led(initial_pos)
-        self.led_interface.start_blinking_led(final_pos)
+        self.led_interface.start_blinking_led(final_pos,1)

@@ -42,10 +42,11 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 1)
         chessMove = ChessMove(initial_pos, final_pos)
 
-        self.led_interface.turn_on_led(initial_pos, final_pos)
+        self.game_loop.show_opponent_move(initial_pos, final_pos)
 
         fn.assert_called_with(initial_pos)
         fn.assert_called_with(final_pos)
+
 
 
 
