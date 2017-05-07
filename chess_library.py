@@ -7,11 +7,12 @@ import chess.uci
 board = chess.Board()
 
 # Setup Stockfish engine
-engine = chess.uci.popen_engine("/stockfish_8_x32")
+engine = chess.uci.popen_engine("stockfish_8_x32")
 engine.uci()
 
 
 # Give a ChessMove object to the third-party library, push it to board if ok
+# Returns true if successful, false if not. Maybe useful for game loop?
 def hand_off(move):
     if isinstance(move, ChessMove):
         try:
@@ -46,6 +47,15 @@ def get_move():
     engine.position(board)
 
     return ChessMove(init, final)
+
+
+# Sets difficulty. Must be between 0 and 20, 20 being hardest
+def set_difficulty(difficulty):
+    if difficulty < 0 or difficulty > 20:
+        raise ValueError("Difficulty must be between 0 and 20")
+    else:
+        new_options = {'Skill Level': difficulty}
+        engine.setoption(new_options)
 
 
 # Self explanatory
