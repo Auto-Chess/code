@@ -49,14 +49,5 @@ def get_move():
 
 
 # Self explanatory
-def is_game_over():
-    return board.is_game_over();
-
-
-# Test code. Very rough but it works
-while not is_game_over():
-    x = get_move()
-    print(x.__str__())
-    y = False
-    while not y:
-        y = hand_off(input("Enter move: "))
+def is_game_over(self):
+    return self.board.is_game_over()
