@@ -63,3 +63,22 @@ class GameLoopEntity():
     def show_opponent_move(self,initial_pos, final_pos):
         self.led_interface.turn_on_led(initial_pos)
         self.led_interface.start_blinking_led(final_pos,1)
+        
+    def run(self):
+        while not self.chess_library.is_game_over():
+            print()
+            print("Round #{}".format(i + 1))
+            print("==========")
+
+            # Prompt user for input
+            self.prompt_user_for_input()
+            initial_pos, final_pos = self.gather_user_input()
+
+            # Give to chess lib
+            self.give_to_chess_library(initial_pos, final_pos)
+
+            # Get move
+            opp_initial_pos, opp_final_pos = self.get_opponent_move_from_library()
+
+            # Show move
+            self.show_opponent_move(opp_initial_pos, opp_final_pos)
