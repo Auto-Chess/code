@@ -35,3 +35,11 @@ class ChessLibrary():
     # Self explanatory
     def is_game_over(self):
         return self.board.is_game_over()
+      
+    # Sets difficulty. Must be between 0 and 20, 20 being hardest
+    def set_difficulty(self, difficulty):
+        if difficulty < 0 or difficulty > 20:
+            raise ValueError("Difficulty must be between 0 and 20")
+        else:
+            new_options = {'Skill Level': difficulty}
+            self.engine.setoption(new_options)
