@@ -3,13 +3,8 @@ from chess_position import ChessPosition
 
 import chess.uci
 
-
 class ChessLibrary():
-
     def __init__(self):
-        # This object is created purely for testing purposes as of now, but might exist permanently in this class later
-        self.board = chess.Board()
-
         # Setup Stockfish engine
         self.engine = chess.uci.popen_engine("stockfish_8_x32")
         self.engine.uci()
@@ -21,7 +16,7 @@ class ChessLibrary():
                 self.board.push_uci(move.__str__())
                 self.engine.position(board)
             except ValueError:
-                print('\033[91m' + "Invalid move: " + move.__str__() + "!" + '\033[0m')
+                print("Invalid move: {}!".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 
@@ -36,7 +31,7 @@ class ChessLibrary():
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
-        self.board.push_uci(str(best_move))
-        self.engine.position(self.board)
 
-        return ChessMove(init, final)
+    # Self explanatory
+    def is_game_over(self):
+        return self.board.is_game_over()
