@@ -50,6 +50,15 @@ class TestGameLoopEntity(unittest.TestCase):
 
 
 
+    @patch("builtins.input", side_effect = ["b4","c5"])
+    def test_gather_user_input(self, input_checker):
+        result = self.game_loop.gather_user_input()
+        initial_pos = ChessPosition("b", 4)
+        final_pos = ChessPosition("c", 5)
+        chessMove = ChessMove(initial_pos, final_pos)
+
+
+        self.assertEquals(result, chessMove)
 
 
 
