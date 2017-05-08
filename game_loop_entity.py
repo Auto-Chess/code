@@ -73,6 +73,9 @@ class GameLoopEntity():
             # Prompt user for input
             self.prompt_user_for_input()
             initial_pos, final_pos = self.gather_user_input()
+            self.led_interface.stop_all()
+
+
 
             # Give to chess lib
             self.give_to_chess_library(initial_pos, final_pos)

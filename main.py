@@ -17,23 +17,4 @@ included in Python by default or downloaded from the internet.
 # Game loop
 game_loop = GameLoopEntity()
 
-for i in range(5):
-    print()
-    print("Round #{}".format(i + 1))
-    print("==========")
-
-    # Prompt user for input
-    game_loop.prompt_user_for_input()
-    initial_pos, final_pos = game_loop.gather_user_input()
-
-    # Give to chess lib
-    game_loop.give_to_chess_library(initial_pos, final_pos)
-
-    # Get move
-    opp_initial_pos, opp_final_pos = game_loop.get_opponent_move_from_library()
-
-    # Show move
-    game_loop.show_opponent_move(opp_initial_pos, opp_final_pos)
-
-print()
-print("Game over!")
+game_loop.run()
