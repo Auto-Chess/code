@@ -57,7 +57,6 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 5)
         chessMove = ChessMove(initial_pos, final_pos)
 
-
         self.assertEquals(result, chessMove)
 
 
@@ -66,8 +65,30 @@ class TestGameLoopEntity(unittest.TestCase):
 
 
 
+    @patch("builtins.input", side_effect=["z20", "b4", "c5"])
+    def test_gather_user_input_initial_check(self, input_checker):
+        self.game_loop.lcd_interface.display = MagicMock()
+        result = self.game_loop.gather_user_input()
+
+        self.game_loop.lcd_interface.display.assert_called_once_with("Incorrect initial coordinate, try again.", "")
+
+        initial_pos = ChessPosition("b", 4)
+        final_pos = ChessPosition("c", 5)
+        chessMove = ChessMove(initial_pos, final_pos)
+
+        self.assertEquals(result, chessMove)
 
 
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch("builtins.input", side_effect=["b4", "z20", "c5"])
+    def test_gather_user_input_final_check(self, input_checker):
+        self.game_loop.lcd_interface.display = MagicMock()
+        result = self.game_loop.gather_user_input()
+
+        self.game_loop.lcd_interface.display.assert_called_once_with("Incorrect final coordinate, try again.", "")
+
+        initial_pos = ChessPosition("b", 4)
+        final_pos = ChessPosition("c", 5)
+        chessMove = ChessMove(initial_pos, final_pos)
+
+        self.assertEquals(result, chessMove)
