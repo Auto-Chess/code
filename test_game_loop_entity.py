@@ -28,7 +28,7 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 1)
         chessMove = ChessMove(initial_pos, final_pos)
 
-        self.chess_library.getMove = MagicMock(return_value=chessMove)
+        self.game_loop.chess_library.get_move = MagicMock(return_value=chessMove)
 
         opponentMove = self.game_loop.get_opponent_move_from_library()
 
@@ -37,15 +37,16 @@ class TestGameLoopEntity(unittest.TestCase):
 
 
     @patch("led_interface.LedInterface.turn_on_led")
-    def test_show_opponent_move(self, fn):
+    @patch("led_interface.LedInterface.start_blinking_led")
+    def test_show_opponent_move(self, turn_on_led_checker, start_blinking_led_checker):
         initial_pos = ChessPosition("b", 4)
         final_pos = ChessPosition("c", 1)
         chessMove = ChessMove(initial_pos, final_pos)
 
         self.game_loop.show_opponent_move(initial_pos, final_pos)
 
-        fn.assert_called_with(initial_pos)
-        fn.assert_called_with(final_pos)
+        turn_on_led_checker.assert_called_with(initial_pos)
+        start_blinking_led_checker.assert_called_with(final_pos, 1)
 
 
 
