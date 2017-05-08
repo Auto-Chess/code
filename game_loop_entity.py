@@ -23,20 +23,20 @@ class GameLoopEntity():
         gettingInitialPosition = True
         while gettingInitialPosition == True:
             initial_input = input("Initial position:")
-            initial_col = initial_input[1]
-            initial_row = initial_input[0]
+            initial_col = initial_input[0]
+            initial_row = int(initial_input[1])
 
             try:
                 initial_pos = ChessPosition(initial_col, initial_row)
                 gettingInitialPosition = False
             except ValueError as err:
-                self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
+                self.lcd_interface.display("Incorrect coordinate, try again.", "")
 
         gettingFinalPosition = True
         while gettingFinalPosition == True:
             final_input = input("Final position:")
-            final_col = final_input[1]
-            final_row = final_input[0]
+            final_col = final_input[0]
+            final_row = int(final_input[1])
 
             try:
                 final_pos = ChessPosition(final_col, final_row)
