@@ -30,7 +30,7 @@ class GameLoopEntity():
                 initial_pos = ChessPosition(initial_col, initial_row)
                 gettingInitialPosition = False
             except ValueError as err:
-                self.lcd_interface.display("Incorrect coordinate, try again.", "")
+                self.lcd_interface.display("Incorrect initial coordinate, try again.", "")
 
         gettingFinalPosition = True
         while gettingFinalPosition == True:
@@ -42,7 +42,7 @@ class GameLoopEntity():
                 final_pos = ChessPosition(final_col, final_row)
                 gettingFinalPosition = False
             except ValueError as err:
-                self.lcd_interface.display("Incorrect coordinate, try again.", "", "")
+                self.lcd_interface.display("Incorrect final coordinate, try again.", "")
 
         move = ChessMove(initial_pos, final_pos)
         return move
