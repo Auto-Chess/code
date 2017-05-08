@@ -49,7 +49,7 @@ class GameLoopEntity():
 
     def give_to_chess_library(self,initial_pos, final_pos):
         chessMove = ChessMove(initial_pos, final_pos)
-        self.chess_library.handOff(chessMove)
+        self.chess_library.hand_off(chessMove)
         #TODO when chess library class is made
 
 

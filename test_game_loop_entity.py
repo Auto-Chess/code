@@ -13,7 +13,7 @@ class TestGameLoopEntity(unittest.TestCase):
         self.game_loop = GameLoopEntity()
         self.led_interface = LedInterface()
 
-    @patch("chess_library.ChessLibrary.handOff")
+    @patch("chess_library.ChessLibrary.hand_off")
     def test_give_to_chess_library(self,fn):
         initial_pos = ChessPosition("b",4)
         final_pos = ChessPosition("c",1)
@@ -36,8 +36,8 @@ class TestGameLoopEntity(unittest.TestCase):
 
 
 
-    @patch("led_interface.LedInterface.turn_on_led")
     @patch("led_interface.LedInterface.start_blinking_led")
+    @patch("led_interface.LedInterface.turn_on_led")
     def test_show_opponent_move(self, turn_on_led_checker, start_blinking_led_checker):
         initial_pos = ChessPosition("b", 4)
         final_pos = ChessPosition("c", 1)
