@@ -6,7 +6,7 @@ import chess.uci
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
-        self.engine = chess.uci.popen_engine("stockfish_8_x32")
+        self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
 
     # Give a ChessMove object to the third-party library, push it to board if ok

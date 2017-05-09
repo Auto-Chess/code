@@ -1,4 +1,4 @@
-# Auto Chess Code
+# Auto Chess Code [![Build Status](https://travis-ci.org/Auto-Chess/code.svg?branch=master)](https://travis-ci.org/Auto-Chess/code)
 This git repository will hold the code for the Auto Chess project.
 
 We will use Python version 3.6.
