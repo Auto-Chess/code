@@ -1,0 +1,9 @@
+language: python
+python:
+  - "3.6"
+install: 
+  - pip install -r requirements.txt
+  - wget https://stockfish.s3.amazonaws.com/stockfish-8-linux.zip
+  - unzip stockfish-8-linux.zip
+  - mv stockfish-8-linux/Linux/stockfish_8_x64 stockfish_8
+script: python -m unittest discover
