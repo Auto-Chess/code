@@ -51,14 +51,20 @@ class TestGameLoopEntity(unittest.TestCase):
 
 
 
+    @patch("lcd_interface.LCDInterface.display")
+    def test_prompt_user_for_beginning_input(self, display_checker):
+        self.game_loop.prompt_user_for_input()
+        display_checker.assert_called_with("Welcome to Auto Chess", "")
+        display_checker.assert_called_with("Enter initial then final position: ","")
+
+
+    @patch("lcd_interface.LCDInterface.display")
+    def test_prompt_user_for_other_input(self, display_checker):
+        self.game_loop.prompt_user_for_input()
+        display_checker.assert_called_with("Enter initial then final position: ", "")
 
 
 
 
 
 
-
-
-
-if __name__ == '__main__':
-    unittest.main()

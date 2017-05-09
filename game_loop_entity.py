@@ -13,8 +13,8 @@ class GameLoopEntity():
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
-            self.lcd_interface.display("Welcome to Auto Chess","","")
-        self.lcd_interface.display("Enter initial then final position: ")
+            self.lcd_interface.display("Welcome to Auto Chess","")
+        self.lcd_interface.display("Enter initial then final position: ","")
 
 
     def gather_user_input(self):
