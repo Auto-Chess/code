@@ -4,8 +4,6 @@ language: python
 python:
   - "3.6"
 install: 
-#  - sudo apt-get update
-#  - sudo apt-get install libc6
   - pip install -r requirements.txt
   - wget https://stockfish.s3.amazonaws.com/stockfish-8-linux.zip
   - unzip stockfish-8-linux.zip
