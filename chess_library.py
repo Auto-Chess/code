@@ -6,7 +6,7 @@ import chess.uci
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
-        self.engine = chess.uci.popen_engine("stockfish_8_x32")
+        self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
 
     # Give a ChessMove object to the third-party library, push it to board if ok
@@ -35,3 +35,11 @@ class ChessLibrary():
     # Self explanatory
     def is_game_over(self):
         return self.board.is_game_over()
+      
+    # Sets difficulty. Must be between 0 and 20, 20 being hardest
+    def set_difficulty(self, difficulty):
+        if difficulty < 0 or difficulty > 20:
+            raise ValueError("Difficulty must be between 0 and 20")
+        else:
+            new_options = {'Skill Level': difficulty}
+            self.engine.setoption(new_options)
