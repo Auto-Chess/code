@@ -1,4 +1,5 @@
 from game_loop_entity import GameLoopEntity
+import webserver
 """
 Main File, run this file to start Auto Chess.
 Run by typing:

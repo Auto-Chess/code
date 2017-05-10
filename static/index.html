@@ -1,0 +1,125 @@
+<!doctype HTML>
+<html>
+<head>
+    <title>Auto Chess</title>
+    <style>
+        html, body {
+            font-size: 10px;
+        }
+
+        .title {
+            width: 100%;
+            font-size: 4rem;
+            text-align: center;
+        }
+
+        .section {
+            width: 49%;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        .section-title {
+            width: 100%;
+            font-size: 3rem;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .timer {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 6rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="title">Auto Chess</div>
+
+<div id="timers">
+    <div class="section timer-container">
+        <div class="section-title">Player</div>
+        <div class="timer" id="player-timer">5:00</div>
+    </div>
+    <div class="section timer-container">
+        <div class="section-title">Opponent</div>
+        <div class="timer" id="opponent-timer">5:00</div>
+    </div>
+</div>
+
+<div id="moves">
+    <div class="section moves-container">
+        <div class="section-title">Player</div>
+        <table class="moves-table" id="player-moves">
+            <tr>
+                <th>#</th>
+                <th>Move</th>
+            </tr>
+        </table>
+    </div>
+    <div class="section moves-container">
+        <div class="section-title">Opponent</div>
+        <table class="moves-table" id="opponent-moves">
+            <tr>
+                <th>#</th>
+                <th>Move</th>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    /**
+     * Make a number 2 digits
+     * @param num Number to make 2 digits
+     * @returns 2 digit form of number
+     */
+    function makeTwoDigits(num) {
+        return ("0" + num).slice(-2);
+    }
+
+    /**
+     * Timer class
+     * @param id Id of HTML element to show timer duration in
+     * @param duration Starting duration in MS
+     * @constructor
+     */
+    function Timer(id, duration) {
+        var self = this;
+        self.id = id;
+        self.start = Date.now();
+        self.duration = duration;
+        self.el = document.getElementById(self.id);
+
+        if (self.el === null) {
+            console.error("Could not find element with id: \"" + self.id + "\"");
+        }
+
+        self.tick = function() {
+            // Calculate
+            var dt = Date.now() - self.start;
+            var ms = self.duration - dt;
+
+            var date = new Date(0, 0, 0, 0, 0, 0, ms);
+
+            // Display
+            if (ms <= 0) {
+                self.el.innerText = "0:00";
+                clearInterval(self.interval);
+            } else {
+                self.el.innerText = date.getMinutes() + ":" + makeTwoDigits(date.getSeconds());
+            }
+        };
+
+        self.interval = setInterval(self.tick, 1000);
+    }
+
+    // Create timers
+    var fiveMinutes = 1000 * 60 * 5;
+    var pTimer = new Timer("player-timer", fiveMinutes);
+    var oTimer = new Timer("opponent-timer", fiveMinutes);
+</script>
+</body>
+</html>
