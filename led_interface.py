@@ -1,6 +1,5 @@
 import collections
 import time
-import RPi.GPIO as GPIO
 from chess_position import ChessPosition
 from chess_move import ChessMove
 
@@ -8,6 +7,11 @@ class LedInterface():
 
     def __init__(self, operation_mode="hardware"):
         self.operation_mode = operation_mode
+
+        if self.operation_mode == "hardware":
+            import RPi.GPIO as GPIO
+        else:
+            from fake_gpio import GPIO
 
         #Sets up the number system for the board and the output pin (location 12 on the diagram)
         GPIO.setmode(GPIO.BCM)
