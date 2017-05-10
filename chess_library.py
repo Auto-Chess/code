@@ -3,23 +3,24 @@ from chess_position import ChessPosition
 
 import chess.uci
 
+
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
+        self.board = chess.Board()
         self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
 
     # Give a ChessMove object to the third-party library, push it to board if ok
-    def hand_off(self,move):
+    def hand_off(self, move):
         if isinstance(move, ChessMove):
             try:
                 self.board.push_uci(move.__str__())
-                self.engine.position(board)
+                self.engine.position(self.board)
             except ValueError:
                 print("Invalid move: {}!".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
-
 
     # Asks Chess Library for a move, pushes it to board, and returns it as a ChessMove object
     def get_move(self):
@@ -31,6 +32,7 @@ class ChessLibrary():
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
+        return ChessMove(init, final)
 
     # Self explanatory
     def is_game_over(self):
