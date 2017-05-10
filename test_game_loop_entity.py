@@ -6,6 +6,7 @@ from chess_move import ChessMove
 from led_interface import LedInterface
 from mock import MagicMock
 from mock import patch
+from mock import call
 
 class TestGameLoopEntity(unittest.TestCase):
     def setUp(self):
@@ -54,9 +55,7 @@ class TestGameLoopEntity(unittest.TestCase):
     @patch("lcd_interface.LCDInterface.display")
     def test_prompt_user_for_beginning_input(self, display_checker):
         self.game_loop.prompt_user_for_input()
-        display_checker.assert_called_with("Welcome to Auto Chess", "")
-        display_checker.assert_called_with("Enter initial then final position: ","")
-
+        display_checker.assert_has_calls([call("Welcome to Auto Chess", ""), call("Enter initial then final position: ","")])
 
     @patch("lcd_interface.LCDInterface.display")
     def test_prompt_user_for_other_input(self, display_checker):
