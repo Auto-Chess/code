@@ -20,13 +20,20 @@ class ChessBoard(db.Model):
     chess_moves = db.relationship('ChessMove', back_populates='chess_board')
 
     def __init__(self):
-        self.secret = str(binascii.hexlify(os.urandom(32))[:64])
+        self.secret = binascii.hexlify(os.urandom(32)).decode("utf-8")[:64]
 
     def __str__(self):
         return "<ChessBoard id={}, secret={}, chess_moves.len={}>".format(self.id, self.secret, len(self.chess_moves))
 
     def __repr__(self):
         return str(self)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'secret': self.secret,
+            'chess_moves': self.chess_moves
+        }
 
 class ChessMove(db.Model):
     __tablename__ = 'chess_moves'
@@ -78,11 +85,10 @@ def api_register():
     db.session.add(board)
     db.session.commit()
 
-    res = dict(
-        board=str(board),
-        errors=[]
-    )
-    return jsonify(res)
+    return jsonify({
+        'board': board.serialize(),
+        'errors': []
+    })
 
 
 # Run if not being included
