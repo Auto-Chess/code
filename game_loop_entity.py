@@ -3,12 +3,78 @@ from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
+from pynput import keyboard
+from threading import Thread, active_count
+
+
+
+
+
 class GameLoopEntity():
+
     def __init__(self):
+        self.paused = False
         self.welcomed = False
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
         self.led_interface = LedInterface()
+        self.thread = Thread(target=self.start_listening)
+        self.thread.start()
+
+    def start_listening(self):
+        # Collect events until released
+        with keyboard.Listener(
+                on_press=self.on_press,
+                on_release=self.on_release) as listener:
+            listener.join()
+
+    def on_press(self, key):
+        #try:
+        #    print('alphanumeric key {0} pressed'.format(
+              #  key.char))
+
+
+        #except AttributeError:
+         #   print('special key {0} pressed'.format(
+          #      key))
+            #
+           # if key == key.esc:
+               # self.lcd_interface.display("Pause Menu","q=Quit n=New d=Diff")
+            #    if key == key.d:
+             #       self.lcd_interface.display("Enter Difficulty 0-20", "")
+
+                #elif key == q:p
+
+
+
+        try:
+            print('alphanumeric key {0} pressed'.format(key.char))
+            if self.paused:
+                if key.char == 'd':
+                    self.lcd_interface.display("Enter Difficulty 0-20", "")
+                    dif = input()
+                    dif = dif[1:len(dif)]
+                    self.chess_library.set_difficulty(int(dif))
+                    self.chess_library.get_difficulty()
+                elif key.char == 'n':
+                    print("y")
+
+        except AttributeError:
+            'special key {0} pressed'.format(key)
+            if key == keyboard.Key.esc:
+                self.paused = True
+
+
+
+
+
+    def on_release(self, key):
+        '{0} released'.format(
+            key)
+        if self.chess_library.is_game_over():
+            # Stop listener
+            return False
+
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
@@ -65,6 +131,7 @@ class GameLoopEntity():
         self.led_interface.start_blinking_led(final_pos,1)
         
     def run(self):
+        i = 1
         while not self.chess_library.is_game_over():
             print()
             print("Round #{}".format(i + 1))
@@ -85,3 +152,6 @@ class GameLoopEntity():
 
             # Show move
             self.show_opponent_move(opp_initial_pos, opp_final_pos)
+
+
+

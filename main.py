@@ -17,4 +17,4 @@ included in Python by default or downloaded from the internet.
 # Game loop
 game_loop = GameLoopEntity()
 
-game_loop.run()
+#game_loop.run()
