@@ -2,7 +2,7 @@ import os
 import binascii
 from datetime import datetime, timedelta
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 
 # Flask app
@@ -39,6 +39,13 @@ class ChessBoard(db.Model):
             'chess_moves': self.chess_moves
         }
 
+    def delete(self, children=False):
+        db.session.delete(self)
+
+        if children:
+            for move in self.chess_moves:
+                db.session.delete(move)
+
     @staticmethod
     def clean_old():
         # Get all ChessBoards that haven't been used in a day, and delete
@@ -48,16 +55,7 @@ class ChessBoard(db.Model):
         old = ChessBoard.query.filter(ChessBoard.last_used < old_date).all()
         for board in old:
             print("Deleting board: {}".format(board))
-            db.session.delete(board)
-
-            # Delete moves
-            i = 0
-            for move in board.chess_moves:
-                db.session.delete(move)
-                i += 1
-
-            if i > 0:
-                print("    Delete {} child ChessMoves".format(i))
+            board.delete(children=True)
 
         print("Committing deletion")
         db.session.commit()
@@ -75,8 +73,8 @@ class ChessMove(db.Model):
     final_col = db.Column(db.String(1), nullable=False)
     final_row = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, id, inital_col, initial_row, final_col, final_row):
-        self.id = id
+    def __init__(self, chess_board_id, inital_col, initial_row, final_col, final_row):
+        self.chess_board_id = chess_board_id
 
         self.initial_col = inital_col
         self.inital_row = initial_row
@@ -116,7 +114,7 @@ def frontend():
     return app.send_static_file('index.html')
 
 # -- -- Register
-@app.route("/register")
+@app.route("/chess_board/register")
 def api_register():
     board = ChessBoard()
     db.session.add(board)
@@ -127,8 +125,62 @@ def api_register():
         'errors': []
     })
 
+def check_chess_board_secret(id):
+    # Check move given by JSON
+    if request.json is None:
+        return make_response(jsonify({
+            'errors': ["Move was be provided in JSON format"]
+        }), 400)
+
+    # Check secret provided
+    if 'Authorization' not in request.headers:
+        return make_response(jsonify({
+            'errors': ["ChessBoard secret must be provided in Authorization header"]
+        }), 401)
+
+    # Check ChessBoard exists
+    board = ChessBoard.query.filter(id=id).first()
+
+    if board is None:
+        return make_response(jsonify({
+            'errors': ["ChessBoard with id \"{}\" not found".format(chess_board_id)]
+        }), 404)
+
+    # Check ChessBoard secret
+    chess_board_secret = request.headers['Authorization']
+    if board.secret != chess_board_secret:
+        return make_response(jsonify({
+            'errors': ["ChessBoard secret in Authorization header does not match stored ChessBoard secret"]
+        }), 401)
+
+    # All good return None
+    return None
 
 
+@app.route("/chess_board/<id>/push_move", methods=['POST'])
+def api_push_move(chess_board_id):
+    # Check request
+    err_resp = check_chess_board_secret(chess_board_id)
+    if err_resp is not None:
+        return err_resp
+
+    # Check for required fields
+    if ('initial_col' not in request.json) or \
+        ('initial_row' not in request.json) or \
+        ('final_col'  not in request.json) or \
+        ('final_row' not in request.json):
+        return make_response(jsonify({
+            'errors': ["One or more of the required request fields was missing"]
+        }), 400)
+
+    # Make ChessMove
+    board = ChessBoard.query.filter(id=chess_board_id).first()
+    move = ChessMove(board.id, request.json.inital_col, request.json.inital_row
+                     request.json.final_col, request.json.final_row)
+
+    # Save
+    db.session.add(move)
+    db.session.commit()
 
 # Run if not being included
 if __name__ == "__main__":

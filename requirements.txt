@@ -2,3 +2,4 @@ mock
 python-chess
 Flask
 flask-sqlalchemy
+requests

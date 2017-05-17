@@ -13,3 +13,6 @@ scan:
 
 status:
 	sudo systemctl status dhcpd4.service
+
+restart-ip:
+	sudo systemctl restart dhcpd4.service
