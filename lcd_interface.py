@@ -5,14 +5,13 @@ class LCDInterface():
     def __init__(self, operation_mode="hardware"):
 
         if (self.operation_mode == "hardware"):
-            self.lcdCom = serial.Serial
-                (
-                port="/dev/serial0",
-                baudrate=9600,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                bytesize=serial.EIGHTBITS,
-                timeout=1
+            self.lcdCom = serial.Serial(
+                    port="/dev/serial0",
+                    baudrate=9600,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE,
+                    bytesize=serial.EIGHTBITS,
+                    timeout=1
                 )
     
     def display(self, first_line, second_line):
