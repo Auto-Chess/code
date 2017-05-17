@@ -45,3 +45,11 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+
+"""
+y = ChessLibrary()
+a = ChessPosition("e", 2)
+b = ChessPosition("e", 4)
+x = ChessMove(a, b)
+y.hand_off(x)
+"""
