@@ -3,7 +3,7 @@ import serial
 class LCDInterface():
 
     def __init__(self, operation_mode="hardware"):
-
+        self.operation_mode = operation_mode
         if (self.operation_mode == "hardware"):
             self.lcdCom = serial.Serial(
                     port="/dev/serial0",
