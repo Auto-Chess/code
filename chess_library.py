@@ -46,6 +46,12 @@ class ChessLibrary():
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
 
+    # Clears the board and then tells Stockfish a new game has started
+    def start_game(self):
+        self.board.reset()
+        # self.engine.position(self.board)
+        self.engine.ucinewgame()
+
 """
 y = ChessLibrary()
 a = ChessPosition("e", 2)
