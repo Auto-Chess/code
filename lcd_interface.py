@@ -22,8 +22,9 @@ class LCDInterface():
 
         if (self.operation_mode=="hardware"):
             self.lcdCom.write(b"\xFE\x01")
-            self.lcdCom.write(bytes(first_line, "ASCII"))
-            self.lcdCom.write(bytes(second_line, "ASCII"))
+            self.lcdCom.write(bytes(str(first_line), "ASCII"))
+            self.lcdCom.write(b"\xFE\xC0")
+            self.lcdCom.write(bytes(str(second_line), "ASCII"))
         else:
             print(first_line)
             print(second_line)
