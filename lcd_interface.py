@@ -39,3 +39,4 @@ class LCDInterface():
     def close(self):
         if (self.operation_mode == "hardware"):
             self.lcdCom.close()
+
