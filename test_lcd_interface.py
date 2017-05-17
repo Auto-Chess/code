@@ -10,4 +10,4 @@ from mock import call
 
 class TestLCDInerface(unittest.TestCase):
     def test_display(self):
-        self.assert_equals(True,True)
+        self.assertEquals(True,True)
