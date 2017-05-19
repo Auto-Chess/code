@@ -4,8 +4,7 @@ from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
 from pynput import keyboard
-from threading import Thread, active_count
-
+from threading import Thread
 
 
 
@@ -47,10 +46,6 @@ class GameLoopEntity():
             if key == keyboard.Key.esc:
                 self.paused = True
 
-
-
-
-
     def on_release(self, key):
         '{0} released'.format(
             key)
@@ -58,13 +53,11 @@ class GameLoopEntity():
             # Stop listener
             return False
 
-
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
             self.lcd_interface.display("Welcome to Auto Chess","")
         self.lcd_interface.display("Enter initial then final position: ","")
-
 
     def gather_user_input(self):
         initial_pos = None
