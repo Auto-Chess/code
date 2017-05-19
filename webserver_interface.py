@@ -78,3 +78,9 @@ class WebServerInterface():
             return True
         else:
             return False
+
+    def push_move(self, move):
+        pass
+
+    def signal_game_over(self):
+        pass
