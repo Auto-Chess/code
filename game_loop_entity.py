@@ -29,24 +29,6 @@ class GameLoopEntity():
             listener.join()
 
     def on_press(self, key):
-        #try:
-        #    print('alphanumeric key {0} pressed'.format(
-              #  key.char))
-
-
-        #except AttributeError:
-         #   print('special key {0} pressed'.format(
-          #      key))
-            #
-           # if key == key.esc:
-               # self.lcd_interface.display("Pause Menu","q=Quit n=New d=Diff")
-            #    if key == key.d:
-             #       self.lcd_interface.display("Enter Difficulty 0-20", "")
-
-                #elif key == q:p
-
-
-
         try:
             print('alphanumeric key {0} pressed'.format(key.char))
             if self.paused:
@@ -57,8 +39,9 @@ class GameLoopEntity():
                     self.chess_library.set_difficulty(int(dif))
                     self.chess_library.get_difficulty()
                 elif key.char == 'n':
-                    print("y")
-
+                    print("jay needs to make a new game function.")
+                elif key.char == 'q':
+                    print("jay needs to make a quit game function.")
         except AttributeError:
             'special key {0} pressed'.format(key)
             if key == keyboard.Key.esc:
@@ -118,9 +101,6 @@ class GameLoopEntity():
         self.chess_library.hand_off(chessMove)
         #TODO when chess library class is made
 
-
-
-
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.get_move()
 
@@ -141,8 +121,6 @@ class GameLoopEntity():
             self.prompt_user_for_input()
             initial_pos, final_pos = self.gather_user_input()
             self.led_interface.stop_all()
-
-
 
             # Give to chess lib
             self.give_to_chess_library(initial_pos, final_pos)
