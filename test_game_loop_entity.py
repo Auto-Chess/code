@@ -47,7 +47,7 @@ class TestGameLoopEntity(unittest.TestCase):
         start_blinking_led_checker.assert_called_with(final_pos, 1)
 
     @patch("builtins.input", side_effect = ["b4","c5"])
-    def test_gather_user_input(self, input_checker):sxzsxzxzxzz
+    def test_gather_user_input(self, input_checker):
         result = self.game_loop.gather_user_input()
         initial_pos = ChessPosition("b", 4)
         final_pos = ChessPosition("c", 5)
