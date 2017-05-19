@@ -3,6 +3,7 @@ from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
+from webserver_interface import WebServerInterface
 from pynput import keyboard
 from threading import Thread
 
@@ -17,6 +18,8 @@ class GameLoopEntity():
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
         self.led_interface = LedInterface()
+        self.webserver_interface = WebServerInterface()
+        self.webserver_interface.register()
         self.thread = Thread(target=self.start_listening)
         self.thread.start()
 
@@ -38,8 +41,10 @@ class GameLoopEntity():
                     self.chess_library.set_difficulty(int(dif))
                     self.chess_library.get_difficulty()
                 elif key.char == 'n':
-                    self.chess_library.start_game()
+                    self.chess_library.start_game
+                    self.webserver_interface.signal_game_over
                 elif key.char == 'q':
+                    self.webserver_interface.signal_game_over
                     self.welcomed = False
         except AttributeError:
             'special key {0} pressed'.format(key)
@@ -85,18 +90,18 @@ class GameLoopEntity():
                 gettingFinalPosition = False
             except ValueError as err:
                 self.lcd_interface.display("Incorrect final coordinate, try again.", "")
-
         move = ChessMove(initial_pos, final_pos)
         return move
 
     def give_to_chess_library(self,initial_pos, final_pos):
         chessMove = ChessMove(initial_pos, final_pos)
         self.chess_library.hand_off(chessMove)
+        self.webserver_interface.push_player_move(chessMove)
         #TODO when chess library class is made
 
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.get_move()
-
+        self.webserver_interface.push_opponent_move()
         return opponentMove
 
     def show_opponent_move(self,initial_pos, final_pos):
@@ -104,6 +109,7 @@ class GameLoopEntity():
         self.led_interface.start_blinking_led(final_pos,1)
         
     def run(self):
+        self.webserver_interface.register
         i = 1
         while not self.chess_library.is_game_over():
             print()
@@ -124,5 +130,6 @@ class GameLoopEntity():
             # Show move
             self.show_opponent_move(opp_initial_pos, opp_final_pos)
 
+        self.webserver_interface.signal_game_over
 
 
