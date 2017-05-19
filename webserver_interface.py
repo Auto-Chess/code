@@ -79,7 +79,10 @@ class WebServerInterface():
         else:
             return False
 
-    def push_move(self, move):
+    def push_opponent_move(self, move):
+        pass
+
+    def push_player_move(self, move):
         pass
 
     def signal_game_over(self):
