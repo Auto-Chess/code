@@ -39,9 +39,9 @@ class GameLoopEntity():
                     self.chess_library.set_difficulty(int(dif))
                     self.chess_library.get_difficulty()
                 elif key.char == 'n':
-                    print("jay needs to make a new game function.")
+                    self.chess_library.start_game()
                 elif key.char == 'q':
-                    print("jay needs to make a quit game function.")
+                    self.welcomed = False
         except AttributeError:
             'special key {0} pressed'.format(key)
             if key == keyboard.Key.esc:
