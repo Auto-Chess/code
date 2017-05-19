@@ -28,7 +28,7 @@ class ChessLibrary():
         best_move, ponder = command.result()
         bm = str(best_move)
 
-        # Converts UCI protocol to ChessPosition via splicing
+        # Converts UCI protocol to ChessPosition via slicing
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
