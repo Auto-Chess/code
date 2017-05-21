@@ -3,3 +3,4 @@ python-chess
 Flask
 flask-sqlalchemy
 requests
+pynput
