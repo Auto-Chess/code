@@ -6,7 +6,7 @@ class WebServerInterface():
     Args:
         - server_url (str): URL of webserver to interact with
     """
-    def __init__(self, server_url="localhost:5000"):
+    def __init__(self, server_url="http://localhost:5000"):
         self.server_url = server_url
 
         # Mark that we haven't retrieve any ChessBoard credentials yet
