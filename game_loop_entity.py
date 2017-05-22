@@ -4,7 +4,12 @@ from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
 from webserver_interface import WebServerInterface
-from pynput import keyboard
+
+try:
+    from pynput import keyboard
+except ImportError as e:
+    keyboard = False
+
 from threading import Thread
 
 
@@ -24,11 +29,14 @@ class GameLoopEntity():
         self.thread.start()
 
     def start_listening(self):
-        # Collect events until released
-        with keyboard.Listener(
-                on_press=self.on_press,
-                on_release=self.on_release) as listener:
-            listener.join()
+        if keyboard != False:
+            # Collect events until released
+            with keyboard.Listener(
+                    on_press=self.on_press,
+                    on_release=self.on_release) as listener:
+                listener.join()
+        else:
+            print ("start_listening: KEYBOARD NOT IMPORTED")
 
     def on_press(self, key):
         try:
