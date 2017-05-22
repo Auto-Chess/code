@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 
+from threading import Thread
+
 # Flask app
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///autochess.db'
@@ -121,7 +123,7 @@ def api_register():
     db.session.commit()
 
     return jsonify({
-        'board': board.serialize(),
+        'chess_board': board.serialize(),
         'errors': []
     })
 
@@ -175,14 +177,25 @@ def api_push_move(chess_board_id):
 
     # Make ChessMove
     board = ChessBoard.query.filter(id=chess_board_id).first()
-    move = ChessMove(board.id, request.json.inital_col, request.json.inital_row
+    move = ChessMove(board.id, request.json.inital_col, request.json.inital_row,
                      request.json.final_col, request.json.final_row)
 
     # Save
     db.session.add(move)
     db.session.commit()
 
+def _run_webserver():
+    try:
+        app.run()
+    except KeyboardInterrupt as e:
+        print("Webserver received keyboard interrupt")
+
+def run_webserver_in_thread():
+    ChessBoard.clean_old()
+
+    run_thread = Thread(target=_run_webserver)
+    run_thread.start()
+
 # Run if not being included
 if __name__ == "__main__":
-    ChessBoard.clean_old()
-    app.run()
+    run_webserver_in_thread()

@@ -126,11 +126,11 @@ class GameLoopEntity():
 
             # Prompt user for input
             self.prompt_user_for_input()
-            initial_pos, final_pos = self.gather_user_input()
+            user_move = self.gather_user_input()
             self.led_interface.stop_all()
 
             # Give to chess lib
-            self.give_to_chess_library(initial_pos, final_pos)
+            self.give_to_chess_library(user_move.initial_pos, user_move.final_pos)
 
             # Get move
             opp_initial_pos, opp_final_pos = self.get_opponent_move_from_library()
