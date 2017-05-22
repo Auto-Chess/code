@@ -7,7 +7,7 @@ from webserver_interface import WebServerInterface
 
 try:
     from pynput import keyboard
-except ImportError as e:
+except Exception as e:
     keyboard = False
 
 from threading import Thread
