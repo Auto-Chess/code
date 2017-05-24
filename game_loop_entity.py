@@ -12,7 +12,6 @@ except Exception as e:
 
 from threading import Thread
 
-
 """Game loop entity class
 Return:
     -str: Asks user for initial input
@@ -35,9 +34,9 @@ class GameLoopEntity():
         self.thread = Thread(target=self.start_listening)
         self.thread.start()
 
-    """Listens for the keyboard to begin typing.
-    Return:
-        -str: String value returned
+    """ Listens for the keyboard to begin typing.
+        Return:
+            -str: Keyboard is not imported
     """
 
     def start_listening(self):
@@ -51,18 +50,18 @@ class GameLoopEntity():
             print ("start_listening: KEYBOARD NOT IMPORTED")
 
     """Listens for when key is being pressed.
-        Changes difficulty for game
-        Quite game option
-        End game option
-    Arg:
-        -key(str): Which key is being pressed
+        Dif asks for in int input of desired difficulty for game
+        If Q is pressed the quit game option runs
+        If N is pressed the new game option runs
+        Arg:
+            -key(str): Which key is being pressed
 
-    Returns:
-        -str: Tells user to enter difficulty
-        -int: Number for difficulty is passed to engine
+        Returns:
+            -str: Tells user to enter difficulty
+            -int: Number for difficulty is passed to engine
 
-    Raises:
-        -Attribute Error: If esc key i pressed a pause menu will appear
+        Raises:
+            -Attribute Error: If esc key is pressed a pause menu will appear
     """
 
     def on_press(self, key):
@@ -87,11 +86,11 @@ class GameLoopEntity():
                 self.paused = True
 
     """Listens for when a button is released
-    Arg:
-        -key(str): Which key is being pressed
+        Arg:
+            -key(str): Which key is being pressed
 
-    Returns:
-        Bool: Turn false to stop listener
+        Returns:
+            Bool: Turns false to stop listener
     """
 
     def on_release(self, key):
@@ -102,24 +101,24 @@ class GameLoopEntity():
             return False
 
     """Sends a string of instructions to the LCD display
-    Returns:
-        -str: Welcome user to the game
-        -str: Tells user to give their input
+        Returns:
+            -str: Welcome user to the game
+            -str: Tells user to give their input
     """
 
     def prompt_user_for_input(self):
         if self.welcomed == False:
             self.welcomed = True
-            self.lcd_interface.display("Welcome to Auto Chess","")
-        self.lcd_interface.display("Enter initial then final position: ","")
+            self.lcd_interface.display("Welcome to Auto Chess", "")
+        self.lcd_interface.display("Enter initial then final position: ", "")
 
-    """Gathers the user input by taking in an initial position and final position
-       Each position is make of an initial column and initial row
-       and an final column and final row
-       Creates a chess position from the initial column and initial row
-       does the same for the final position.
-       Creates a move from the initial and final position
-       Returns:
+    """ Gathers the user input by taking in an initial position and final position
+        Each position is make of an initial column and initial row
+        and an final column and final row
+        Creates a chess position from the initial column and initial row
+        does the same for the final position.
+        Creates a move from the initial and final position
+        Returns:
             -str: Asks user for initial position
             -str: Asks user for final position
             -str: Chess move
@@ -158,20 +157,22 @@ class GameLoopEntity():
         move = ChessMove(initial_pos, final_pos)
         return move
 
-    """Makes the inputted inital and final position to the chess engine.
-       Creates a chessMove from the positions.
-       Args:
+    """ Gives the inputted initial and final position to the chess engine.
+        Creates a chessMove from the positions.
+        Sends the chess move to the webserver interface.
+        Args:
             initial_pos(str): The given input in previous method
             final_pos(str): The given input in previous method
     """
 
-    def give_to_chess_library(self,initial_pos, final_pos):
+    def give_to_chess_library(self, initial_pos, final_pos):
         chessMove = ChessMove(initial_pos, final_pos)
         self.chess_library.hand_off(chessMove)
         self.webserver_interface.push_player_move(chessMove)
         #TODO when chess library class is made
 
-    """Takes the opponent move from the chess engine.
+    """ Takes the opponent move from the chess engine.
+        Pushes opponent move to webserver.
         Returns:
             -int: Opponent move from chess engine
     """
@@ -187,9 +188,9 @@ class GameLoopEntity():
             final_pos(str): The opponents final position
     """
 
-    def show_opponent_move(self,initial_pos, final_pos):
+    def show_opponent_move(self, initial_pos, final_pos):
         self.led_interface.turn_on_led(initial_pos)
-        self.led_interface.start_blinking_led(final_pos,1)
+        self.led_interface.start_blinking_led(final_pos, 1)
 
     """ Runs the game loop entity.
         Checks if game loop is in a game over stage.
