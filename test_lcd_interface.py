@@ -1,19 +1,37 @@
+# Importing the necessary libraries to run the tests
 import unittest
 from chess_library import ChessLibrary
 from game_loop_entity import GameLoopEntity
 from chess_position import ChessPosition
 from chess_move import ChessMove
+from lcd_interface import LCDInterface
 from led_interface import LedInterface
 from mock import MagicMock
 from mock import patch
 from mock import call
 
-class TestLCDInerface(unittest.TestCase):
-    def test_display(self):
-        self.assertEquals(True,True)
+# Creating the test class with the testing methods
+class TestLCDInterface(unittest.TestCase):
 
-if len(first_line) > 16:
-    raise ValueError("First line of text can not be more than 16 characters")
+    # Setting up a variable to use the variables in the other libraries
+    def setUp(self):
+        self.lcdInterface = LCDInterface()
 
-if len(second_line) > 16:
-    raise ValueError("First line of text can not be more than 16 characters")
+    # Testing the first line of the LCD Display
+    def test_display_first_line(self):
+        first_line = "aklsjd;bfoasjng;oasjnjf;oasund;absdgjkasb.dkjgbas;dfjka;js"
+        second_line = "Hello"
+        self.lcdInterface.display(first_line, second_line)
+        with self.assertRaises(ValueError) as context:
+            self.lcdInterface.display(first_line, second_line)
+
+    #Testing the second line of the LCD Display
+    @patch("LCDInterface.display")
+    def test_display_second_line(self, top_checker, bottom_checker):
+        first_line = "Hello"
+        second_line = "aa;lskdfn;alksdnf;asdh;flaksdf;oasdhf;aiszdhf;alnsdkjfj;alsdf;j"
+        self.lcdInterface.display(first_line, second_line)
+        with self.assertRaises(ValueError) as context:
+            self.lcdInterface.display(first_line, second_line)
+        top_checker.assert_called_with("Hello")
+        bottom_checker.assert_called_with("aa;lskdfn;alksdnf;asdh;flaksdf;oasdhf;aiszdhf;alnsdkjfj;alsdf;j")
