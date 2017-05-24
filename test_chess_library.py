@@ -4,8 +4,15 @@ from chess_library import ChessLibrary
 from chess_move import ChessMove
 from chess_position import ChessPosition
 from mock import MagicMock
+from concurrent.futures._base import Future
 from mock import call
 
+class FakeEngineCommand():
+    def result(self):
+        test_board = ChessLibrary()
+        x = test_board.board.push_uci("e2e4")
+
+        return x, x
 
 class TestChessLibrary(unittest.TestCase):
     def setUp(self):
@@ -26,4 +33,15 @@ class TestChessLibrary(unittest.TestCase):
         self.chess_library.engine.position.assert_called_with(self.chess_library.board)
 
     def test_get_move(self):
-        self.chess_library.engine.go = MagicMock(return_value=chess.Move)
+        command = FakeEngineCommand()
+        self.chess_library.engine.go = MagicMock(return_value=command)
+
+        bm = self.chess_library.get_move()
+
+        x = ChessMove(ChessPosition("e", 2), ChessPosition("e", 4))
+
+        self.assertEquals(x.__str__(), bm.__str__())
+
+    def test_set_difficulty(self):
+
+

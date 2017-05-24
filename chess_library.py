@@ -25,6 +25,7 @@ class ChessLibrary():
     # Asks Chess Library for a move, pushes it to board, and returns it as a ChessMove object
     def get_move(self):
         command = self.engine.go(movetime=2000, async_callback=True)
+        print(type(command))
         best_move, ponder = command.result()
         bm = str(best_move)
 
@@ -52,10 +53,12 @@ class ChessLibrary():
         # self.engine.position(self.board)
         self.engine.ucinewgame()
 
-"""
+
+'''
 y = ChessLibrary()
 a = ChessPosition("e", 2)
 b = ChessPosition("e", 4)
 x = ChessMove(a, b)
 y.hand_off(x)
-"""
+y.get_move()
+'''
