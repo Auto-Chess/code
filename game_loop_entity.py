@@ -36,7 +36,6 @@ class GameLoopEntity():
         self.thread.start()
 
     """Listens for the keyboard to begin typing.
-
     Return:
         -str: String value returned
     """
