@@ -28,6 +28,39 @@
             text-decoration: underline;
         }
 
+        /* Game Connect */
+        #game-connect {
+            max-width: 40rem;
+            margin: auto;
+            margin-top: 2rem;
+            font-size: 2rem;
+        }
+
+        #short-code-input-box {
+            height: 8.5rem;
+            margin-top: 5rem;
+            text-align: center;
+        }
+
+        #short-code-input-box div, input {
+            width: 45%;
+            display: inline-block;
+            text-align: center;
+        }
+
+        #short-code-input-label {
+            float: left;
+        }
+
+        #short-code-input {
+            width: 10rem;
+            height: 4rem;
+            line-height: 4rem;
+            margin-top: 1.5rem;
+            float: right;
+            font-size: 2.5rem;
+        }
+
         /* Timer */
         .timer {
             width: 100%;
@@ -37,14 +70,6 @@
         }
 
         /* Moves List */
-        /*
-        <table class="moves-table" id="opponent-moves">
-            <tr>
-                <th>#</th>
-                <th>Move</th>
-            </tr>
-        </table>
-         */
         .moves-table {
             width: 100%;
             margin-top: 2rem;
@@ -67,36 +92,49 @@
 </head>
 <body>
 <div class="title">Auto Chess</div>
+<div id="game-connect">
+    <div class="section-title">Connect</div>
 
-<div id="timers">
-    <div class="section timer-container">
-        <div class="section-title">Player</div>
-        <div class="timer" id="player-timer">5:00</div>
+    <div id="short-code-input-box">
+        <div id="short-code-input-label">Please enter your Chess Board's 4 digit code</div>
+        <input id="short-code-input" pattern=".{4}" required title="4 characters" type="text">
     </div>
-    <div class="section timer-container">
-        <div class="section-title">Opponent</div>
-        <div class="timer" id="opponent-timer">5:00</div>
-    </div>
+
+    <div id="connect-button">Connect</div>
+    <div id="connect-status"></div>
 </div>
 
-<div id="moves">
-    <div class="section moves-container">
-        <div class="section-title">Player</div>
-        <table class="moves-table" id="player-moves">
-            <tr>
-                <th>#</th>
-                <th>Move</th>
-            </tr>
-        </table>
+<div id="game-info" style="display: none">
+    <div id="timers">
+        <div class="section timer-container">
+            <div class="section-title">Player</div>
+            <div class="timer" id="player-timer">5:00</div>
+        </div>
+        <div class="section timer-container">
+            <div class="section-title">Opponent</div>
+            <div class="timer" id="opponent-timer">5:00</div>
+        </div>
     </div>
-    <div class="section moves-container">
-        <div class="section-title">Opponent</div>
-        <table class="moves-table" id="opponent-moves">
-            <tr>
-                <th>#</th>
-                <th>Move</th>
-            </tr>
-        </table>
+
+    <div id="moves">
+        <div class="section moves-container">
+            <div class="section-title">Player</div>
+            <table class="moves-table" id="player-moves">
+                <tr>
+                    <th>#</th>
+                    <th>Move</th>
+                </tr>
+            </table>
+        </div>
+        <div class="section moves-container">
+            <div class="section-title">Opponent</div>
+            <table class="moves-table" id="opponent-moves">
+                <tr>
+                    <th>#</th>
+                    <th>Move</th>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 

@@ -4,13 +4,23 @@ from datetime import datetime, timedelta
 
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
+from flask_redis import FlaskRedis
+from flask_socketio import SocketIO
 
 from threading import Thread
 
+def random_string():
+    return binascii.hexlify(os.urandom(32)).decode("utf-8")
+
 # Flask app
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost/auto-chess'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/auto-chess'
+app.config['REDIS_URL'] = 'redis://:@localhost:6379/0'
+app.config['SECRET_KEY'] = random_string()
+
 db = SQLAlchemy(app)
+redis_store = FlaskRedis(app)
+socketio = SocketIO(app)
 
 # Models
 # -- Define
@@ -21,23 +31,66 @@ class ChessBoard(db.Model):
     secret = db.Column(db.String(64), nullable=False)
     last_used = db.Column(db.DateTime, nullable=False)
 
+    short_code = db.Column(db.String(4), nullable=False)
+
+    game_running = db.Column(db.Boolean, nullable=False)
+    turn = db.Column(db.String(12), nullable=False)
+
+    TURN_USER = 'user'
+    TURN_OPPONENT = 'opponent'
+
     chess_moves = db.relationship('ChessMove', back_populates='chess_board')
 
     def __init__(self):
-        self.secret = binascii.hexlify(os.urandom(32)).decode("utf-8")[:64]
-        self.last_used = datetime.today()
+        self.secret = random_string()[:64]
+        self.set_last_used_to_now()
+
+        self.set_unique_short_code()
+
+        self.game_running = True
+        self.turn = ChessBoard.TURN_USER
 
     def __str__(self):
-        return "<ChessBoard id={}, secret={}, chess_moves.len={}>".format(self.id, self.secret, len(self.chess_moves))
+        return "<ChessBoard id={}, secret={}, last_used={}, short_code={}, game_running={}, turn={}, chess_moves.len={}>"\
+            .format(self.id,
+                self.secret,
+                self.last_used,
+                self.short_code,
+                self.game_running,
+                self.turn,
+                len(self.chess_moves))
 
     def __repr__(self):
         return str(self)
+
+    def set_last_used_to_now(self):
+        self.last_used = datetime.today()
+
+    def set_unique_short_code(self):
+        # Loop unit unique
+        code = None
+        while True:
+            # Generate new code
+            code = random_string()[:4]
+
+            # Find boards with code
+            board = ChessBoard.query.filter(short_code=code).first()
+
+            # If no board with code exit, else repeat
+            if board is None:
+                break
+
+        # Set code
+        self.short_code = code
 
     def serialize(self):
         return {
             'id': self.id,
             'secret': self.secret,
             'last_used': self.last_used,
+            'short_code': self.short_code,
+            'game_running': self.game_running,
+            'turn': self.turn,
             'chess_moves': self.chess_moves
         }
 
@@ -83,7 +136,7 @@ class ChessMove(db.Model):
         self.player = player
 
         self.initial_col = inital_col
-        self.inital_row = initial_row
+        self.initial_row = initial_row
 
         self.final_col = final_col
         self.final_row = final_row
@@ -105,8 +158,8 @@ class ChessMove(db.Model):
             'id': self.id,
             'chess_board_id': self.chess_board_id,
             'player': self.player,
-            'inital_col': self.initial_col,
-            'inital_row': self.inital_row,
+            'initial_col': self.initial_col,
+            'initial_row': self.inital_row,
             'final_col': self.final_col,
             'final_row': self.final_row
         }
@@ -164,7 +217,6 @@ def check_chess_board_secret(id):
     # All good return None
     return None
 
-
 @app.route("/chess_board/<id>/push_move/<player>", methods=['POST'])
 def api_push_move(chess_board_id, chess_move_player):
     # Check request
@@ -189,22 +241,30 @@ def api_push_move(chess_board_id, chess_move_player):
 
     # Make ChessMove
     board = ChessBoard.query.filter(id=chess_board_id).first()
+    board.set_last_used_to_now()
+
     move = ChessMove(board.id, chess_move_player, request.json.inital_col, request.json.inital_row,
                      request.json.final_col, request.json.final_row)
 
     # Save
+    db.session.add(board)
     db.session.add(move)
     db.session.commit()
 
+# -- -- Socket IO Events
+"""
+@socketio.on('connect')
+def socketio_on_connect(data):
+"""
+
 def _run_webserver():
-    app.run()
+    ChessBoard.clean_old()
+    socketio.run(app)
 
 def run_webserver_in_thread():
-    ChessBoard.clean_old()
-
     run_thread = Thread(target=_run_webserver)
     run_thread.start()
 
 # Run if not being included
 if __name__ == "__main__":
-    run_webserver_in_thread()
+    _run_webserver()
