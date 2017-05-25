@@ -174,6 +174,15 @@ def frontend():
     # Server static/index.html
     return app.send_static_file('index.html')
 
+# -- -- Socket IO resources
+@app.route("/js/socket.io.js")
+def socketio_client_lib():
+    return app.send_static_file("js/socket.io.js")
+
+@app.route("/js/socket.io.js.map")
+def socketio_client_lib_map():
+    return app.send_static_file("js/socket.io.js.map")
+
 # -- -- Register
 @app.route("/chess_board/register")
 def api_register():
@@ -250,12 +259,6 @@ def api_push_move(chess_board_id, chess_move_player):
     db.session.add(board)
     db.session.add(move)
     db.session.commit()
-
-# -- -- Socket IO Events
-"""
-@socketio.on('connect')
-def socketio_on_connect(data):
-"""
 
 def _run_webserver():
     ChessBoard.clean_old()
