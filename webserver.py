@@ -9,7 +9,7 @@ from threading import Thread
 
 # Flask app
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///autochess.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost/auto-chess'
 db = SQLAlchemy(app)
 
 # Models
@@ -69,14 +69,18 @@ class ChessMove(db.Model):
     chess_board_id = db.Column(db.Integer, db.ForeignKey('chess_boards.id'))
     chess_board = db.relationship('ChessBoard', back_populates='chess_moves')
 
+    player = db.Column(db.String(12), nullable=False)
+
     initial_col = db.Column(db.String(1), nullable=False)
     inital_row = db.Column(db.Integer, nullable=False)
 
     final_col = db.Column(db.String(1), nullable=False)
     final_row = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, chess_board_id, inital_col, initial_row, final_col, final_row):
+    def __init__(self, chess_board_id, player, inital_col, initial_row, final_col, final_row):
         self.chess_board_id = chess_board_id
+
+        self.player = player
 
         self.initial_col = inital_col
         self.inital_row = initial_row
@@ -85,9 +89,10 @@ class ChessMove(db.Model):
         self.final_row = final_row
 
     def __str__(self):
-        return "<ChessMove id={}, chess_board_id={}, {}{}=>{}{}>".format(
+        return "<ChessMove id={}, chess_board_id={}, player={}, {}{}=>{}{}>".format(
             self.id,
             self.chess_board_id,
+            self.player,
             self.initial_col, self.inital_row,
             self.final_col, self.final_row
         )
@@ -99,6 +104,7 @@ class ChessMove(db.Model):
         return {
             'id': self.id,
             'chess_board_id': self.chess_board_id,
+            'player': self.player,
             'inital_col': self.initial_col,
             'inital_row': self.inital_row,
             'final_col': self.final_col,
@@ -145,7 +151,7 @@ def check_chess_board_secret(id):
 
     if board is None:
         return make_response(jsonify({
-            'errors': ["ChessBoard with id \"{}\" not found".format(chess_board_id)]
+            'errors': ["ChessBoard with id \"{}\" not found".format(id)]
         }), 404)
 
     # Check ChessBoard secret
@@ -159,17 +165,23 @@ def check_chess_board_secret(id):
     return None
 
 
-@app.route("/chess_board/<id>/push_move", methods=['POST'])
-def api_push_move(chess_board_id):
+@app.route("/chess_board/<id>/push_move/<player>", methods=['POST'])
+def api_push_move(chess_board_id, chess_move_player):
     # Check request
     err_resp = check_chess_board_secret(chess_board_id)
     if err_resp is not None:
         return err_resp
 
+    # Check player value is valid
+    if chess_move_player != 'user' and chess_move_player != 'opponent':
+        return make_response(jsonify({
+            'errors': ["Move player must have value \"user\" or \"opponent\""]
+        }), 400)
+
     # Check for required fields
     if ('initial_col' not in request.json) or \
         ('initial_row' not in request.json) or \
-        ('final_col'  not in request.json) or \
+        ('final_col' not in request.json) or \
         ('final_row' not in request.json):
         return make_response(jsonify({
             'errors': ["One or more of the required request fields was missing"]
@@ -177,7 +189,7 @@ def api_push_move(chess_board_id):
 
     # Make ChessMove
     board = ChessBoard.query.filter(id=chess_board_id).first()
-    move = ChessMove(board.id, request.json.inital_col, request.json.inital_row,
+    move = ChessMove(board.id, chess_move_player, request.json.inital_col, request.json.inital_row,
                      request.json.final_col, request.json.final_row)
 
     # Save
@@ -185,10 +197,7 @@ def api_push_move(chess_board_id):
     db.session.commit()
 
 def _run_webserver():
-    try:
-        app.run()
-    except KeyboardInterrupt as e:
-        print("Webserver received keyboard interrupt")
+    app.run()
 
 def run_webserver_in_thread():
     ChessBoard.clean_old()

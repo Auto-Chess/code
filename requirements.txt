@@ -4,3 +4,4 @@ Flask
 flask-sqlalchemy
 requests
 pynput
+psycopg2

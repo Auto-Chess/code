@@ -58,7 +58,7 @@ class WebServerInterface():
     Does not re-register if already has credentials
     
     Returns:
-        - bool: True if registration is success, False otherwise
+        - dict: None if success, Dict containing the `status_code` and `errors` if failure
     """
     def register(self):
         if not self.registered():
@@ -67,23 +67,58 @@ class WebServerInterface():
             # Check for errors
             errs_dict = self.check_resp_errs(resp)
             if errs_dict is not None:
-                print("Error registering ChessBoard: {}".format(errs_dict))
-                return False
+                return errs_dict
 
             # Save creds
             data = resp.json()
             self.chess_board_id = data['chess_board']['id']
             self.chess_board_secret = data['chess_board']['secret']
 
-            return True
-        else:
-            return False
-
     def push_opponent_move(self, move):
-        pass
+        self._push_chess_move('opponent', move)
 
     def push_player_move(self, move):
-        pass
+        self._push_chess_move('user', move)
+
+    """Pushes a Chess Move up to the webserver
+    Args:
+        - player (str): Who made the move, either "user" or "opponent"
+        - move (ChessMove): Chess move to push
+        
+    Returns:
+        - dict: None if success, Dict containing the `status_code` and `errors` if failure
+        
+    Raises:
+        - AssertionError: If not registered with API
+        - ValueError: If player is not "user" or "opponent"
+    """
+    def _push_chess_move(self, player, move):
+        if not self.registered():
+            raise AssertionError("Not registered with API")
+
+        # Check player value
+        if player != 'user' and player != 'opponent':
+            raise ValueError("player must be \"user\" or \"opponent\"")
+
+        # Make request
+        data = {
+            'initial_col': move.init_move.col,
+            'initial_row': move.init_move.row,
+            'final_col': move.final_pos.col,
+            'final_row': move.final_pos.row
+        }
+        headers = {
+            'Authorization': self.chess_board_secret
+        }
+
+        resp = requests.post(self.mk_api_url("/chess_board/{}/push_move/{}".format(self.chess_board_id, player)),
+                             headers=headers,
+                             json=data)
+
+        # Check errors
+        errs_dict = self.check_resp_errs(resp)
+        if errs_dict is not None:
+            return errs_dict
 
     def signal_game_over(self):
         pass
