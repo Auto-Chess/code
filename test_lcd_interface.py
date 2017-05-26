@@ -26,12 +26,17 @@ class TestLCDInterface(unittest.TestCase):
             self.lcdInterface.display(first_line, second_line)
 
     #Testing the second line of the LCD Display
-    @patch("LCDInterface.display")
     def test_display_second_line(self, top_checker, bottom_checker):
         first_line = "Hello"
         second_line = "aa;lskdfn;alksdnf;asdh;flaksdf;oasdhf;aiszdhf;alnsdkjfj;alsdf;j"
         self.lcdInterface.display(first_line, second_line)
         with self.assertRaises(ValueError) as context:
             self.lcdInterface.display(first_line, second_line)
-        top_checker.assert_called_with("Hello")
-        bottom_checker.assert_called_with("aa;lskdfn;alksdnf;asdh;flaksdf;oasdhf;aiszdhf;alnsdkjfj;alsdf;j")
+
+    def test_display_success(self):
+        self.lcdInterface.lcdCom.write = MagicMock()
+        first_line = "Hello"
+        second_line = "World"
+        self.lcdInterface.display(first_line, second_line)
+
+        self.lcdInterface.lcdCom.write.assert_has_calls(call(b"\xFE\x01"), call(first_line), call(b"\xFE\xC0"), call(second_line))
