@@ -43,5 +43,10 @@ class TestChessLibrary(unittest.TestCase):
         self.assertEquals(x.__str__(), bm.__str__())
 
     def test_set_difficulty(self):
+        new_options = {'Skill Level': 5}
 
+        self.chess_library.engine.setoption = MagicMock()
+        self.chess_library.set_difficulty(5)
+
+        self.chess_library.engine.setoption.assert_called_with(new_options)
 
