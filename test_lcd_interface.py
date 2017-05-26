@@ -15,7 +15,7 @@ class TestLCDInterface(unittest.TestCase):
 
     # Setting up a variable to use the variables in the other libraries
     def setUp(self):
-        self.lcdInterface = LCDInterface()
+        self.lcdInterface = LCDInterface("test")
 
     # Testing the first line of the LCD Display
     def test_display_first_line(self):
