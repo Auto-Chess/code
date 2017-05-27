@@ -18,7 +18,7 @@ class ChessLibrary():
                 self.board.push_uci(move.__str__())
                 self.engine.position(self.board)
             except ValueError:
-                print("Invalid move: {}!".format(str(move)))
+                raise ValueError("Invalid move: {}!".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 

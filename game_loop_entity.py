@@ -3,11 +3,10 @@ from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
+
 from webserver_interface import WebServerInterface
 from pynput import keyboard
 from threading import Thread
-
-
 
 
 class GameLoopEntity():
@@ -59,7 +58,7 @@ class GameLoopEntity():
             return False
 
     def prompt_user_for_input(self):
-        if self.welcomed == False:
+        if not self.welcomed:
             self.welcomed = True
             self.lcd_interface.display("Welcome to Auto Chess","")
         self.lcd_interface.display("Enter initial then final position: ","")
@@ -67,27 +66,27 @@ class GameLoopEntity():
     def gather_user_input(self):
         initial_pos = None
         final_pos = None
-        gettingInitialPosition = True
-        while gettingInitialPosition == True:
+        getting_initial_position = True
+        while getting_initial_position:
             initial_input = input("Initial position:")
             initial_col = initial_input[0]
             initial_row = int(initial_input[1])
 
             try:
                 initial_pos = ChessPosition(initial_col, initial_row)
-                gettingInitialPosition = False
-            except ValueError as err:
+                getting_initial_position = False
+            except ValueError:
                 self.lcd_interface.display("Incorrect initial coordinate, try again.", "")
 
-        gettingFinalPosition = True
-        while gettingFinalPosition == True:
+        getting_final_position = True
+        while getting_final_position:
             final_input = input("Final position:")
             final_col = final_input[0]
             final_row = int(final_input[1])
 
             try:
                 final_pos = ChessPosition(final_col, final_row)
-                gettingFinalPosition = False
+                getting_final_position = False
             except ValueError as err:
                 self.lcd_interface.display("Incorrect final coordinate, try again.", "")
         move = ChessMove(initial_pos, final_pos)
