@@ -227,6 +227,4 @@ class GameLoopEntity():
             # Show move
             self.show_opponent_move(opp_initial_pos, opp_final_pos)
 
-        self.webserver_interface.signal_game_over
-
-
+        self.webserver_interface.signal_game_over()

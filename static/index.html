@@ -218,7 +218,39 @@
     var shortCodeInput = document.getElementById("short-code-input");
     var connectStatus = document.getElementById("connect-status");
 
-    var socket = undefined;
+    function Socket(chess_board_id) {
+        var self = this;
+        self.chess_board_id = chess_board_id;
+        self.socket = undefined;
+
+        /**
+         * Connect to server socket
+         * @throws Error if already connected to socket
+         */
+        self.connect = function() {
+            if (self.socket !== undefined) {
+                throw Error("Already connected to socket");
+            }
+
+            self.socket = io("/");
+            self.socket.on("connect", self.onConnect);
+        };
+
+        /**
+         * Determine if instance is connected to server via a socket
+         * @returns bool True if connected, false if not
+         */
+        self.connected = function() {
+            return self.socket === undefined;
+        };
+
+        /**
+         * Handler to be run when socket connects to server
+         */
+        self.onConnect = function() {
+            console.log("onConnect");
+        };
+    }
 
     function onConnectButtonClick() {
         if (socket !== undefined) {
@@ -226,11 +258,13 @@
             connectStatus.classList.add("error");
         } else {
             socket = io("/" + shortCodeInput.value);
-            socket.on("")
+            socket.on("connection", )
         }
 
         return false;
     }
+
+
 
     // Create timers
     var fiveMinutes = 1000 * 60 * 5;

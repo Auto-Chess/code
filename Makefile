@@ -1,6 +1,11 @@
-.PHONY: setup-file setup scan status restart-ip \
+.PHONY: run \
+		setup-file setup scan status restart-ip \
 		psql-create psql-destroy psql-start psql-stop \
 		redis-create redis-destroy redis-start redis-stop
+
+# Run
+run:
+	python ./main.py
 
 # RPI Network Setup
 # -- -- Configure dhcpd via config file

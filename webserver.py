@@ -5,9 +5,9 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_redis import FlaskRedis
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 
-from threading import Thread
+from multiprocessing import Process
 
 def random_string():
     return binascii.hexlify(os.urandom(32)).decode("utf-8")
@@ -260,14 +260,34 @@ def api_push_move(chess_board_id, chess_move_player):
     db.session.add(move)
     db.session.commit()
 
+@socketio.on('join')
+def socket_on_join(data):
+    join_room(data['room'])
+
+@socketio.on('leave')
+def socket_on_leave(data):
+    leave_room(data['room'])
+
 def _run_webserver():
     ChessBoard.clean_old()
     socketio.run(app)
 
+_run_thread = None
 def run_webserver_in_thread():
-    run_thread = Thread(target=_run_webserver)
-    run_thread.start()
+    global _run_thread
+    _run_thread = Process(target=_run_webserver)
+    _run_thread.start()
+
+def stop_webserver_in_thread():
+    global _run_thread
+    if _run_thread is not None:
+        _run_thread.terminate()
+        _run_thread.join()
+    else:
+        raise RuntimeError("Server not running")
 
 # Run if not being included
 if __name__ == "__main__":
-    _run_webserver()
+    #_run_webserver()
+    run_webserver_in_thread()
+    stop_webserver_in_thread()
