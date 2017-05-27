@@ -14,12 +14,24 @@ def random_string():
 
 # Flask app
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/auto-chess'
-app.config['REDIS_URL'] = 'redis://:@localhost:6379/0'
+
+ENV_DEBUG = "debug"
+ENV_PROD = "production"
+ENV_TEST = "test"
+
+ENVIRONMENT = os.getenv('ENVIRONMENT', ENV_DEBUG)
+
+if ENVIRONMENT == ENV_TEST:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///autochess.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/auto-chess'
+
+#app.config['REDIS_URL'] = 'redis://:@localhost:6379/0'
 app.config['SECRET_KEY'] = random_string()
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-redis_store = FlaskRedis(app)
+#redis_store = FlaskRedis(app)
 socketio = SocketIO(app)
 
 # Models
@@ -74,7 +86,7 @@ class ChessBoard(db.Model):
             code = random_string()[:4]
 
             # Find boards with code
-            board = ChessBoard.query.filter(short_code=code).first()
+            board = ChessBoard.query.filter(ChessBoard.short_code==code).first()
 
             # If no board with code exit, else repeat
             if board is None:
@@ -125,7 +137,7 @@ class ChessMove(db.Model):
     player = db.Column(db.String(12), nullable=False)
 
     initial_col = db.Column(db.String(1), nullable=False)
-    inital_row = db.Column(db.Integer, nullable=False)
+    initial_row = db.Column(db.Integer, nullable=False)
 
     final_col = db.Column(db.String(1), nullable=False)
     final_row = db.Column(db.Integer, nullable=False)
@@ -209,7 +221,7 @@ def check_chess_board_secret(id):
         }), 401)
 
     # Check ChessBoard exists
-    board = ChessBoard.query.filter(id=id).first()
+    board = ChessBoard.query.filter(ChessBoard.id==id).first()
 
     if board is None:
         return make_response(jsonify({
@@ -226,7 +238,7 @@ def check_chess_board_secret(id):
     # All good return None
     return None
 
-@app.route("/chess_board/<id>/push_move/<player>", methods=['POST'])
+@app.route("/chess_board/<chess_board_id>/push_move/<chess_move_player>", methods=['POST'])
 def api_push_move(chess_board_id, chess_move_player):
     # Check request
     err_resp = check_chess_board_secret(chess_board_id)
@@ -249,16 +261,18 @@ def api_push_move(chess_board_id, chess_move_player):
         }), 400)
 
     # Make ChessMove
-    board = ChessBoard.query.filter(id=chess_board_id).first()
+    board = ChessBoard.query.filter(ChessBoard.id == chess_board_id).first()
     board.set_last_used_to_now()
 
-    move = ChessMove(board.id, chess_move_player, request.json.inital_col, request.json.inital_row,
-                     request.json.final_col, request.json.final_row)
+    move = ChessMove(board.id, chess_move_player, request.json['initial_col'], request.json['initial_row'],
+                     request.json['final_col'], request.json['final_row'])
 
     # Save
     db.session.add(board)
     db.session.add(move)
     db.session.commit()
+
+    return jsonify({'errors': []})
 
 @socketio.on('join')
 def socket_on_join(data):

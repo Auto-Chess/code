@@ -4,15 +4,28 @@ from game_loop_entity import GameLoopEntity
 from chess_position import ChessPosition
 from chess_move import ChessMove
 from led_interface import LedInterface
+import webserver
+
 from mock import MagicMock
 from mock import patch
 from mock import call
 
 class TestGameLoopEntity(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        webserver.run_webserver_in_thread()
+
+    @classmethod
+    def tearDownClass(cls):
+        webserver.stop_webserver_in_thread()
+
     def setUp(self):
         self.chess_library = ChessLibrary()
         self.game_loop = GameLoopEntity()
         self.led_interface = LedInterface()
+
+    def tearDown(self):
+        pass
 
     @patch("chess_library.ChessLibrary.hand_off")
     def test_give_to_chess_library(self,fn):
@@ -32,7 +45,7 @@ class TestGameLoopEntity(unittest.TestCase):
 
         opponentMove = self.game_loop.get_opponent_move_from_library()
 
-        self.assertEquals(chessMove, opponentMove)
+        self.assertEqual(chessMove, opponentMove)
 
     @patch("led_interface.LedInterface.start_blinking_led")
     @patch("led_interface.LedInterface.turn_on_led")
@@ -53,7 +66,7 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 5)
         chessMove = ChessMove(initial_pos, final_pos)
 
-        self.assertEquals(result, chessMove)
+        self.assertEqual(result, chessMove)
 
     @patch("lcd_interface.LCDInterface.display")
     def test_prompt_user_for_beginning_input(self, display_checker):
@@ -76,7 +89,7 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 5)
         chessMove = ChessMove(initial_pos, final_pos)
 
-        self.assertEquals(result, chessMove)
+        self.assertEqual(result, chessMove)
 
     @patch("builtins.input", side_effect=["b4", "z20", "c5"])
     def test_gather_user_input_final_check(self, input_checker):
@@ -89,4 +102,4 @@ class TestGameLoopEntity(unittest.TestCase):
         final_pos = ChessPosition("c", 5)
         chessMove = ChessMove(initial_pos, final_pos)
 
-        self.assertEquals(result, chessMove)
+        self.assertEqual(result, chessMove)

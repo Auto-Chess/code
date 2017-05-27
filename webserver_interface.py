@@ -102,8 +102,8 @@ class WebServerInterface():
 
         # Make request
         data = {
-            'initial_col': move.init_move.col,
-            'initial_row': move.init_move.row,
+            'initial_col': move.init_pos.col,
+            'initial_row': move.init_pos.row,
             'final_col': move.final_pos.col,
             'final_row': move.final_pos.row
         }

@@ -7,3 +7,4 @@ pynput
 psycopg2
 flask-redis
 flask-socketio
+eventlet

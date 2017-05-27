@@ -1,11 +1,16 @@
-.PHONY: run \
+.PHONY: run test\
 		setup-file setup scan status restart-ip \
 		psql-create psql-destroy psql-start psql-stop \
 		redis-create redis-destroy redis-start redis-stop
 
 # Run
+# -- -- Run
 run:
 	python ./main.py
+
+# -- -- Test
+test:
+	ENVIRONMENT=test python -m unittest discover
 
 # RPI Network Setup
 # -- -- Configure dhcpd via config file

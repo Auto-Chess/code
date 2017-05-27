@@ -33,6 +33,7 @@ class GameLoopEntity():
         self.webserver_interface.register()
         self.thread = Thread(target=self.start_listening)
         self.thread.start()
+        self.listener = None
 
     """ Listens for the keyboard to begin typing.
         Return:
@@ -42,12 +43,19 @@ class GameLoopEntity():
     def start_listening(self):
         if keyboard != False:
             # Collect events until released
-            with keyboard.Listener(
+            self.listener = keyboard.Listener(
                     on_press=self.on_press,
-                    on_release=self.on_release) as listener:
-                listener.join()
+                    on_release=self.on_release)
         else:
             print ("start_listening: KEYBOARD NOT IMPORTED")
+
+    def stop_listening(self):
+        if self.listener is None:
+            print("Not listening")
+        else:
+            self.listener.stop()
+            self.listener.join()
+            self.thread.join()
 
     """Listens for when key is being pressed.
         Dif asks for in int input of desired difficulty for game
@@ -179,7 +187,7 @@ class GameLoopEntity():
 
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.get_move()
-        self.webserver_interface.push_opponent_move()
+        self.webserver_interface.push_opponent_move(opponentMove)
         return opponentMove
 
     """Sends the opponent move the LED board.
