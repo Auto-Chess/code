@@ -227,12 +227,12 @@ class GameLoopEntity():
             self.led_interface.stop_all()
 
             # Give to chess lib
-            self.give_to_chess_library(user_move.initial_pos, user_move.final_pos)
+            self.give_to_chess_library(user_move.init_pos, user_move.final_pos)
 
             # Get move
-            opp_initial_pos, opp_final_pos = self.get_opponent_move_from_library()
+            opp_move = self.get_opponent_move_from_library()
 
             # Show move
-            self.show_opponent_move(opp_initial_pos, opp_final_pos)
+            self.show_opponent_move(opp_move.init_pos, opp_move.final_pos)
 
         self.webserver_interface.signal_game_over()

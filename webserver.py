@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_redis import FlaskRedis
-from flask_socketio import SocketIO, join_room, leave_room
+from flask_socketio import SocketIO, join_room, send, emit
 
 from multiprocessing import Process
 
@@ -47,6 +47,7 @@ class ChessBoard(db.Model):
 
     game_running = db.Column(db.Boolean, nullable=False)
     turn = db.Column(db.String(12), nullable=False)
+    turn_number = db.Column(db.Integer, nullable=False)
 
     TURN_USER = 'user'
     TURN_OPPONENT = 'opponent'
@@ -61,15 +62,17 @@ class ChessBoard(db.Model):
 
         self.game_running = True
         self.turn = ChessBoard.TURN_USER
+        self.turn_number = 1
 
     def __str__(self):
-        return "<ChessBoard id={}, secret={}, last_used={}, short_code={}, game_running={}, turn={}, chess_moves.len={}>"\
+        return "<ChessBoard id={}, secret={}, last_used={}, short_code={}, game_running={}, turn={}, turn_number={}, chess_moves.len={}>"\
             .format(self.id,
                 self.secret,
                 self.last_used,
                 self.short_code,
                 self.game_running,
                 self.turn,
+                self.turn_number,
                 len(self.chess_moves))
 
     def __repr__(self):
@@ -95,6 +98,24 @@ class ChessBoard(db.Model):
         # Set code
         self.short_code = code
 
+    """Sets ChessBoard turn to the opposite of provide value
+    If value is TURN_USER then turn will be set to TURN_OPPONENT and vice versa
+    
+    Args:
+        - value (str): Value to set opposite of
+        
+    Raises:
+        - ValueError: If value is not one of TURN_USER or TURN_OPPONENT
+    """
+    def set_turn_opposite_of(self, value):
+        if (value != ChessBoard.TURN_USER) and (value != ChessBoard.TURN_OPPONENT):
+            raise ValueError("value must be one of \"{}\" or \"{}\", was: \"{}\"".format(ChessBoard.TURN_USER, ChessBoard.TURN_OPPONENT, value))
+
+        if value == ChessBoard.TURN_USER:
+            self.turn = ChessBoard.TURN_OPPONENT
+        else:
+            self.turn = ChessBoard.TURN_USER
+
     def serialize(self):
         return {
             'id': self.id,
@@ -103,8 +124,20 @@ class ChessBoard(db.Model):
             'short_code': self.short_code,
             'game_running': self.game_running,
             'turn': self.turn,
+            'turn_number': self.turn_number,
             'chess_moves': self.chess_moves
         }
+
+    def pub_to_websocket(self):
+        socketio.emit("chess_board", {
+            'id': self.id,
+            'last_used': self.last_used,
+            'short_code': self.short_code,
+            'game_running': self.game_running,
+            'turn': self.turn,
+            'turn_number': self.turn_number,
+            'chess_moves': self.chess_moves
+        }, room=self.short_code)
 
     def delete(self, children=False):
         db.session.delete(self)
@@ -117,15 +150,16 @@ class ChessBoard(db.Model):
     def clean_old():
         # Get all ChessBoards that haven't been used in a day, and delete
         old_date = datetime.today() - timedelta(days=1)
-        print("Looking for ChessBoards older than {} to remove".format(old_date))
+        print("ChessBoard: Sanitising Chess Boards older than: {}".format(old_date))
 
         old = ChessBoard.query.filter(ChessBoard.last_used < old_date).all()
         for board in old:
-            print("Deleting board: {}".format(board))
+            print("ChessBoard: Deleting old Chess Board, board: {}".format(board))
             board.delete(children=True)
 
-        print("Committing deletion")
+        print("ChessBoard: Committing old Chess Board deletion")
         db.session.commit()
+        print("ChessBoard: Old Chess Board deletion success")
 
 class ChessMove(db.Model):
     __tablename__ = 'chess_moves'
@@ -142,12 +176,12 @@ class ChessMove(db.Model):
     final_col = db.Column(db.String(1), nullable=False)
     final_row = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, chess_board_id, player, inital_col, initial_row, final_col, final_row):
+    def __init__(self, chess_board_id, player, initial_col, initial_row, final_col, final_row):
         self.chess_board_id = chess_board_id
 
         self.player = player
 
-        self.initial_col = inital_col
+        self.initial_col = initial_col
         self.initial_row = initial_row
 
         self.final_col = final_col
@@ -158,7 +192,7 @@ class ChessMove(db.Model):
             self.id,
             self.chess_board_id,
             self.player,
-            self.initial_col, self.inital_row,
+            self.initial_col, self.initial_row,
             self.final_col, self.final_row
         )
 
@@ -171,10 +205,13 @@ class ChessMove(db.Model):
             'chess_board_id': self.chess_board_id,
             'player': self.player,
             'initial_col': self.initial_col,
-            'initial_row': self.inital_row,
+            'initial_row': self.initial_row,
             'final_col': self.final_col,
             'final_row': self.final_row
         }
+
+    def pub_to_websocket(self):
+        socketio.emit("chess_move", self.serialize(), room=self.chess_board.short_code)
 
 # -- -- Create
 db.create_all()
@@ -201,6 +238,8 @@ def api_register():
     board = ChessBoard()
     db.session.add(board)
     db.session.commit()
+
+    print("API Chess Board Register: Registered Chess Board, board: {}".format(board))
 
     return jsonify({
         'chess_board': board.serialize(),
@@ -262,29 +301,56 @@ def api_push_move(chess_board_id, chess_move_player):
 
     # Make ChessMove
     board = ChessBoard.query.filter(ChessBoard.id == chess_board_id).first()
+    board.set_turn_opposite_of(chess_move_player)
     board.set_last_used_to_now()
 
     move = ChessMove(board.id, chess_move_player, request.json['initial_col'], request.json['initial_row'],
                      request.json['final_col'], request.json['final_row'])
+
+    print("API Push Move: Received move, chess board: {}, move: {}".format(board, move))
 
     # Save
     db.session.add(board)
     db.session.add(move)
     db.session.commit()
 
+    # Notify web clients
+    move.pub_to_websocket()
+    board.pub_to_websocket()
+
     return jsonify({'errors': []})
 
-@socketio.on('join')
+# -- -- Web socket
+@socketio.on("join")
 def socket_on_join(data):
-    join_room(data['room'])
+    # Check Short Code in request
+    if 'chess_board_short_code' not in data:
+        emit("join_failed", "No short code provided")
+        return False
 
-@socketio.on('leave')
-def socket_on_leave(data):
-    leave_room(data['room'])
+    short_code = data['chess_board_short_code']
+
+    # Check Chess Board with short code exists
+    board = ChessBoard.query.filter(ChessBoard.short_code==short_code).first()
+    if board is None:
+        print("Error: Socket On join: Failed to find Chess Board with short code: \"{}\"".format(short_code))
+        emit("join_failed", "No Chess Board with short code provided")
+        return False
+
+    print("Socket On join: Website client subscribed with short code: \"{}\"".format(short_code))
+
+    join_room(short_code)
+    emit("joined")
+    board.pub_to_websocket()
+
 
 def _run_webserver():
     ChessBoard.clean_old()
-    socketio.run(app)
+
+    try:
+        socketio.run(app)
+    except KeyboardInterrupt as e:
+        print("Keyboard interrupted server")
 
 _run_thread = None
 def run_webserver_in_thread():
@@ -302,6 +368,4 @@ def stop_webserver_in_thread():
 
 # Run if not being included
 if __name__ == "__main__":
-    #_run_webserver()
-    run_webserver_in_thread()
-    stop_webserver_in_thread()
+    _run_webserver()

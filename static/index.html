@@ -126,7 +126,7 @@
     <form onsubmit="return onConnectButtonClick();">
         <div id="short-code-input-box">
             <div id="short-code-input-label">Please enter your Chess Board's 4 digit code</div>
-            <input id="short-code-input" pattern=".{4}" required title="4 characters" type="text">
+            <input id="short-code-input" pattern=".{4}" required title="4 characters" type="text" value="8b62">
         </div>
 
         <button id="connect-button">Connect</button>
@@ -169,6 +169,13 @@
 </div>
 
 <script>
+    // Element vars
+    var gameConnectEl = document.getElementById("game-connect");
+    var shortCodeInputEl = document.getElementById("short-code-input");
+    var gameConnectStatusEl = document.getElementById("connect-status");
+
+    var gameInfoEl = document.getElementById("game-info");
+
     /**
      * Make a number 2 digits
      * @param num Number to make 2 digits
@@ -190,6 +197,7 @@
         self.start = Date.now();
         self.duration = duration;
         self.el = document.getElementById(self.id);
+        self.interval = undefined;
 
         if (self.el === null) {
             console.error("Could not find element with id: \"" + self.id + "\"");
@@ -211,60 +219,120 @@
             }
         };
 
-        self.interval = setInterval(self.tick, 1000);
+        self.pause = function() {
+            if (self.interval === undefined) {
+                console.error("Can not pause timer, already paused");
+                return;
+            }
+
+            clearInterval(self.interval);
+        }
+
+        self.start = function() {
+            if (self.interval !== undefined) {
+                console.error("Can not start timer, already started");
+                return;
+            }
+
+            self.interval = setInterval(self.tick, 1000);
+        }
     }
 
     // Connect button
-    var shortCodeInput = document.getElementById("short-code-input");
-    var connectStatus = document.getElementById("connect-status");
 
-    function Socket(chess_board_id) {
+    function Socket() {
         var self = this;
-        self.chess_board_id = chess_board_id;
         self.socket = undefined;
+        self.joined = false;
 
         /**
          * Connect to server socket
          * @throws Error if already connected to socket
          */
-        self.connect = function() {
+        self.connect = function(chess_board_short_code) {
             if (self.socket !== undefined) {
                 throw Error("Already connected to socket");
             }
 
+            self.chess_board_short_code = chess_board_short_code;
+            gameConnectStatusEl.innerText = "Connecting";
+
             self.socket = io("/");
             self.socket.on("connect", self.onConnect);
+            self.socket.on("joined", self.onJoined);
+            self.socket.on("join_failed", self.onJoinFailed);
+
+            self.socket.on("chess_move", self.onChessMove);
+            self.socket.on("chess_bard", self.onChessBoard);
         };
 
         /**
          * Determine if instance is connected to server via a socket
-         * @returns bool True if connected, false if not
+         * @returns boolean True if connected, false if not
          */
         self.connected = function() {
-            return self.socket === undefined;
+            return self.socket !== undefined;
         };
 
         /**
          * Handler to be run when socket connects to server
          */
         self.onConnect = function() {
-            console.log("onConnect");
+            self.socket.emit("join", {chess_board_short_code: self.chess_board_short_code})
+        };
+
+        /**
+         * Handler to be run when socket joins room via server
+         */
+        self.onJoined = function() {
+            self.joined = true;
+            gameConnectStatusEl.innerText = "Connected";
+            gameConnectEl.style.display = "none";
+            gameInfoEl.style.display = "block";
+        };
+
+        /**
+         * Handler to be run when socket emits the "join_failed" event.
+         * This occurs when the server fails to subscribe our client to chess board changes
+         * @param errMsg Error message from server
+         */
+        self.onJoinFailed = function (errMsg) {
+            self.joined = false;
+            gameConnectStatusEl.innerText = errMsg;
+            gameConnectStatusEl.classList.add("error");
+        };
+
+        /**
+         * Handler to be run when socket emits the "chess_move" event.
+         * This event signifies a new chess move in the game
+         * @param data New Chess Move
+         */
+        self.onChessMove = function(data) {
+            var moveHtml = "<tr>";
+
+        };
+
+        /**
+         * Handler to be run when socket emits the "chess_board" event.
+         * This event signifies an update in the subscribed Chess Board
+         * @param data New Chess Board
+         */
+        self.onChessBoard = function(data) {
+            console.log(data);
         };
     }
 
+    var socket = new Socket();
     function onConnectButtonClick() {
-        if (socket !== undefined) {
-            connectStatus.innerText = "Already connected";
-            connectStatus.classList.add("error");
+        if (socket.connected() && socket.joined) {
+            gameConnectStatusEl.innerText = "Already connected";
+            gameConnectStatusEl.classList.add("error");
         } else {
-            socket = io("/" + shortCodeInput.value);
-            socket.on("connection", )
+            socket.connect(shortCodeInputEl.value);
         }
 
         return false;
     }
-
-
 
     // Create timers
     var fiveMinutes = 1000 * 60 * 5;

@@ -1,4 +1,4 @@
-.PHONY: run test\
+.PHONY: run run-server test \
 		setup-file setup scan status restart-ip \
 		psql-create psql-destroy psql-start psql-stop \
 		redis-create redis-destroy redis-start redis-stop
@@ -7,6 +7,9 @@
 # -- -- Run
 run:
 	python ./main.py
+
+run-server:
+	python ./webserver.py
 
 # -- -- Test
 test:
@@ -44,6 +47,7 @@ psql-create:
 		-e POSTGRES_PASSWORD=password \
 		-e POSTGRES_DB=auto-chess \
 		-p 5432:5432 \
+		--network=host \
 		-d \
 		postgres
 psql-destroy:
