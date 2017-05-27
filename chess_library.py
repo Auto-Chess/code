@@ -28,7 +28,7 @@ class ChessLibrary():
         best_move, ponder = command.result()
         bm = str(best_move)
 
-        # Converts UCI protocol to ChessPosition via splicing
+        # Converts UCI protocol to ChessPosition via slicing
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
@@ -45,3 +45,17 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+
+    # Clears the board and then tells Stockfish a new game has started
+    def start_game(self):
+        self.board.reset()
+        # self.engine.position(self.board)
+        self.engine.ucinewgame()
+
+"""
+y = ChessLibrary()
+a = ChessPosition("e", 2)
+b = ChessPosition("e", 4)
+x = ChessMove(a, b)
+y.hand_off(x)
+"""
