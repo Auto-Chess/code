@@ -25,6 +25,7 @@ class GameLoopEntity():
     def __init__(self):
         self.paused = False
         self.welcomed = False
+        self.pressed = False
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(2)
@@ -36,6 +37,7 @@ class GameLoopEntity():
         self.listener = None
 
     """ Listens for the keyboard to begin typing.
+        Saves listener for later usage.
         Return:
             -str: Keyboard is not imported
     """
@@ -45,7 +47,9 @@ class GameLoopEntity():
             # Collect events until released
             self.listener = keyboard.Listener(
                     on_press=self.on_press,
-                    on_release=self.on_release)
+                    on_release=self.on_release) as listener:
+            self.listener = listener
+            self.listener.join()
         else:
             print ("start_listening: KEYBOARD NOT IMPORTED")
 
@@ -73,25 +77,27 @@ class GameLoopEntity():
     """
 
     def on_press(self, key):
-        try:
-            print('alphanumeric key {0} pressed'.format(key.char))
-            if self.paused:
-                if key.char == 'd':
-                    self.lcd_interface.display("Enter Difficulty 0-20", "")
-                    dif = input()
-                    dif = dif[1:len(dif)]
-                    self.chess_library.set_difficulty(int(dif))
-                    self.chess_library.get_difficulty()
-                elif key.char == 'n':
-                    self.chess_library.start_game
-                    self.webserver_interface.signal_game_over
-                elif key.char == 'q':
-                    self.webserver_interface.signal_game_over
-                    self.welcomed = False
-        except AttributeError:
-            'special key {0} pressed'.format(key)
-            if key == keyboard.Key.esc:
-                self.paused = True
+        if pressed == False:
+            pressed = True:
+            try:
+                print('alphanumeric key {0} pressed'.format(key.char))
+                if self.paused:
+                    if key.char == 'd':
+                        self.lcd_interface.display("Enter Difficulty 0-20", "")
+                        dif = input()
+                        dif = dif[1:len(dif)]
+                        self.chess_library.set_difficulty(int(dif))
+                        self.chess_library.get_difficulty()
+                    elif key.char == 'n':
+                        self.chess_library.start_game()
+                        self.webserver_interface.signal_game_over()
+                    elif key.char == 'q':
+                        self.webserver_interface.signal_game_over()
+                        self.welcomed = False
+            except AttributeError:
+                print('special key {0} pressed'.format(key))
+                if key == keyboard.Key.esc:
+                    self.paused = True
 
     """Listens for when a button is released
         Arg:
@@ -102,7 +108,8 @@ class GameLoopEntity():
     """
 
     def on_release(self, key):
-        '{0} released'.format(
+        pressed = False
+        print('{0} released'.format(key))
             key)
         if self.chess_library.is_game_over():
             # Stop listener
@@ -174,10 +181,13 @@ class GameLoopEntity():
     """
 
     def give_to_chess_library(self, initial_pos, final_pos):
-        chessMove = ChessMove(initial_pos, final_pos)
-        self.chess_library.hand_off(chessMove)
-        self.webserver_interface.push_player_move(chessMove)
-        #TODO when chess library class is made
+        try:
+            chessMove = ChessMove(initial_pos, final_pos)
+            self.chess_library.hand_off(chessMove)
+            self.webserver_interface.push_player_move(chessMove)
+        except ValueError as err:
+            self.lcd_interface.display("Chess move is invalid.")
+            self.prompt_user_for_input()
 
     """ Takes the opponent move from the chess engine.
         Pushes opponent move to webserver.
@@ -214,12 +224,9 @@ class GameLoopEntity():
     """
 
     def run(self):
-        self.webserver_interface.register
+        self.webserver_interface.register()
         i = 1
         while not self.chess_library.is_game_over():
-            print()
-            print("Round #{}".format(i + 1))
-            print("==========")
 
             # Prompt user for input
             self.prompt_user_for_input()
