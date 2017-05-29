@@ -111,7 +111,7 @@ class WebServerInterface():
             'Authorization': self.chess_board_secret
         }
 
-        resp = requests.post(self.mk_api_url("/chess_board/{}/push_move/{}".format(self.chess_board_id, player)),
+        resp = requests.post(self.mk_api_url("/chess_board/{}/moves/{}".format(self.chess_board_id, player)),
                              headers=headers,
                              json=data)
 

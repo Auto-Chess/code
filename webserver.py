@@ -116,6 +116,9 @@ class ChessBoard(db.Model):
         else:
             self.turn = ChessBoard.TURN_USER
 
+    def increment_turn_number(self):
+        self.turn_number += 1
+
     def serialize(self):
         return {
             'id': self.id,
@@ -128,16 +131,23 @@ class ChessBoard(db.Model):
             'chess_moves': self.chess_moves
         }
 
-    def pub_to_websocket(self):
-        socketio.emit("chess_board", {
+    def insecure_serialize(self):
+        moves = []
+        for move in self.chess_moves:
+            moves.append(move.serialize())
+
+        return {
             'id': self.id,
-            'last_used': self.last_used,
+            'last_used': str(self.last_used),
             'short_code': self.short_code,
             'game_running': self.game_running,
             'turn': self.turn,
             'turn_number': self.turn_number,
-            'chess_moves': self.chess_moves
-        }, room=self.short_code)
+            'chess_moves': moves
+        }
+
+    def pub_to_websocket(self):
+        socketio.emit("chess_board", self.insecure_serialize(), room=self.short_code)
 
     def delete(self, children=False):
         db.session.delete(self)
@@ -169,6 +179,7 @@ class ChessMove(db.Model):
     chess_board = db.relationship('ChessBoard', back_populates='chess_moves')
 
     player = db.Column(db.String(12), nullable=False)
+    turn_number = db.Column(db.Integer, nullable=False)
 
     initial_col = db.Column(db.String(1), nullable=False)
     initial_row = db.Column(db.Integer, nullable=False)
@@ -176,10 +187,11 @@ class ChessMove(db.Model):
     final_col = db.Column(db.String(1), nullable=False)
     final_row = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, chess_board_id, player, initial_col, initial_row, final_col, final_row):
+    def __init__(self, chess_board_id, player, turn_number, initial_col, initial_row, final_col, final_row):
         self.chess_board_id = chess_board_id
 
         self.player = player
+        self.turn_number = turn_number
 
         self.initial_col = initial_col
         self.initial_row = initial_row
@@ -188,10 +200,11 @@ class ChessMove(db.Model):
         self.final_row = final_row
 
     def __str__(self):
-        return "<ChessMove id={}, chess_board_id={}, player={}, {}{}=>{}{}>".format(
+        return "<ChessMove id={}, chess_board_id={}, player={}, turn_number={}, {}{}=>{}{}>".format(
             self.id,
             self.chess_board_id,
             self.player,
+            self.turn_number,
             self.initial_col, self.initial_row,
             self.final_col, self.final_row
         )
@@ -204,6 +217,7 @@ class ChessMove(db.Model):
             'id': self.id,
             'chess_board_id': self.chess_board_id,
             'player': self.player,
+            'turn_number': self.turn_number,
             'initial_col': self.initial_col,
             'initial_row': self.initial_row,
             'final_col': self.final_col,
@@ -277,8 +291,63 @@ def check_chess_board_secret(id):
     # All good return None
     return None
 
-@app.route("/chess_board/<chess_board_id>/push_move/<chess_move_player>", methods=['POST'])
-def api_push_move(chess_board_id, chess_move_player):
+@app.route("/chess_board/short_code/<chess_board_short_code>")
+def api_chess_board_get_by_short_code(chess_board_short_code):
+    # Get board
+    board = ChessBoard.query.filter(ChessBoard.short_code == chess_board_short_code).first()
+
+    # Check exists
+    if board is None:
+        return make_response(jsonify({
+            'errors': ["No Chess Board with provided short code found"]
+        }), 404)
+
+    # Return
+    return jsonify({
+        'chess_board': board.insecure_serialize(),
+        'errors': []
+    })
+
+@app.route("/chess_board/<chess_board_id>")
+def api_chess_board_get(chess_board_id):
+    # Get board
+    board = ChessBoard.query.filter(ChessBoard.id == chess_board_id).first()
+
+    # Check exists
+    if board is None:
+        return make_response(jsonify({
+            'errors': ["No Chess Board with provided id found"]
+        }), 404)
+
+    # Return
+    return jsonify({
+        'chess_board': board.insecure_serialize(),
+        'errors': []
+    })
+
+@app.route("/chess_board/<chess_board_id>/moves/<chess_move_player>")
+def api_chess_board_moves_list(chess_board_id, chess_move_player):
+    # Check player value is valid
+    if chess_move_player != 'user' and chess_move_player != 'opponent':
+        return make_response(jsonify({
+            'errors': ["Move player must have value \"user\" or \"opponent\""]
+        }), 400)
+
+    # Get Moves
+    moves = ChessMove.query.filter(ChessMove.chess_board_id == chess_board_id and ChessMove.player == chess_move_player).all()
+
+    # Make moves a response
+    resp = []
+    for move in moves:
+        resp.append(move.serialize())
+
+    return jsonify({
+        'moves': resp,
+        'errors': []
+    })
+
+@app.route("/chess_board/<chess_board_id>/moves/<chess_move_player>", methods=['POST'])
+def api_chess_board_moves_create(chess_board_id, chess_move_player):
     # Check request
     err_resp = check_chess_board_secret(chess_board_id)
     if err_resp is not None:
@@ -302,12 +371,13 @@ def api_push_move(chess_board_id, chess_move_player):
     # Make ChessMove
     board = ChessBoard.query.filter(ChessBoard.id == chess_board_id).first()
     board.set_turn_opposite_of(chess_move_player)
+    board.increment_turn_number()
     board.set_last_used_to_now()
 
-    move = ChessMove(board.id, chess_move_player, request.json['initial_col'], request.json['initial_row'],
+    move = ChessMove(board.id, chess_move_player, board.turn_number, request.json['initial_col'], request.json['initial_row'],
                      request.json['final_col'], request.json['final_row'])
 
-    print("API Push Move: Received move, chess board: {}, move: {}".format(board, move))
+    print("API Chess Board: Id {}: Moves: Player {}: Received move: {}".format(chess_board_id, chess_move_player, move))
 
     # Save
     db.session.add(board)
@@ -341,8 +411,6 @@ def socket_on_join(data):
 
     join_room(short_code)
     emit("joined")
-    board.pub_to_websocket()
-
 
 def _run_webserver():
     ChessBoard.clean_old()

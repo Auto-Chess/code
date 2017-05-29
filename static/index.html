@@ -126,7 +126,7 @@
     <form onsubmit="return onConnectButtonClick();">
         <div id="short-code-input-box">
             <div id="short-code-input-label">Please enter your Chess Board's 4 digit code</div>
-            <input id="short-code-input" pattern=".{4}" required title="4 characters" type="text" value="8b62">
+            <input id="short-code-input" pattern=".{4}" required title="4 characters" type="text">
         </div>
 
         <button id="connect-button">Connect</button>
@@ -175,6 +175,90 @@
     var gameConnectStatusEl = document.getElementById("connect-status");
 
     var gameInfoEl = document.getElementById("game-info");
+    var playerMovesEl = document.getElementById("player-moves");
+    var opponentMovesEl = document.getElementById("opponent-moves");
+
+    // Element helpers
+    /**
+     * Add the provided moves to the UI
+     * @param move {ChessMove} Chess Move to add to UI
+     */
+    function addChessMoveToUI(move) {
+        var moveHtml = "<tr>";
+        moveHtml += "<td>" + move.turn_number + "</td>";
+        moveHtml += "<td>" + move.initial_col + move.initial_row + move.final_col  + move.final_row + "</td>";
+        moveHtml += "</tr>";
+
+        if (move.player === "user") {
+            playerMovesEl.innerHTML += moveHtml;
+        } else {
+            opponentMovesEl.innerHTML += moveHtml;
+        }
+    }
+
+    /**
+     * Reset Chess Moves UI for specified player
+     * @param player {string} Player to reset Chess Moves for
+     * @throws {Error} If player is not one of "user" or "opponent"
+     */
+    function resetChessMovesUI(player) {
+        // Check player value
+        if (player !== "user" && player !== "opponent") {
+            throw new Error("Player argument must have value of \"user\" or \"opponent\"");
+        }
+
+        if (player === "user") {
+            playerMovesEl.innerHTML = "";
+        } else {
+            opponentMovesEl.innerHTML = "";
+        }
+    }
+
+    // Create timers
+    var fiveMinutes = 1000 * 60 * 5;
+    var playerTimer = new Timer("player-timer", fiveMinutes);
+    var opponentTimer = new Timer("opponent-timer", fiveMinutes);
+
+    // Timer helpers
+    /**
+     * Start and pause the player and opponent timers based on the provided Chess Board
+     * @param chessBoard {ChessBoard} Chess Board to set timers based on
+     */
+    function setTimersFromChessBoard(chessBoard) {
+        if (chessBoard.game_running) {
+             // Set timers based on Chess Board turn
+            if (chessBoard.turn === "user") {
+                if (!playerTimer.running()) playerTimer.start();
+                if (opponentTimer.running()) opponentTimer.pause();
+            } else if (chessBoard.turn === "opponent") {
+                if (!opponentTimer.running()) opponentTimer.start();
+                if (playerTimer.running()) playerTimer.pause();
+            }
+        } else {
+            if (playerTimer.running()) playerTimer.stop();
+            if (opponentTimer.running()) opponentTimer.stop();
+        }
+    }
+
+    // Game
+    var game = new Game();
+    var socket = new Socket();
+
+    // Game helpers
+    /**
+     * Handler to be run when the connect button is clicked
+     */
+    function onConnectButtonClick() {
+        if (socket.connected() && socket.joined) {
+            gameConnectStatusEl.innerText = "Already connected";
+            gameConnectStatusEl.classList.add("error");
+        } else {
+            socket.connect(shortCodeInputEl.value);
+            game.fetchChessBoardByShortCode(shortCodeInputEl.value);
+        }
+
+        return false;
+    }
 
     /**
      * Make a number 2 digits
@@ -194,7 +278,7 @@
     function Timer(id, duration) {
         var self = this;
         self.id = id;
-        self.start = Date.now();
+        self.startTime = Date.now();
         self.duration = duration;
         self.el = document.getElementById(self.id);
         self.interval = undefined;
@@ -203,9 +287,12 @@
             console.error("Could not find element with id: \"" + self.id + "\"");
         }
 
+        /**
+         * Function run every timer "tick"
+         */
         self.tick = function() {
             // Calculate
-            var dt = Date.now() - self.start;
+            var dt = Date.now() - self.startTime;
             var ms = self.duration - dt;
 
             var date = new Date(0, 0, 0, 0, 0, 0, ms);
@@ -219,6 +306,9 @@
             }
         };
 
+        /**
+         * Pauses the Timer, errors if Timer is already paused
+         */
         self.pause = function() {
             if (self.interval === undefined) {
                 console.error("Can not pause timer, already paused");
@@ -226,8 +316,11 @@
             }
 
             clearInterval(self.interval);
-        }
+        };
 
+        /**
+         * Start the Timer, errors if Timer is already started
+         */
         self.start = function() {
             if (self.interval !== undefined) {
                 console.error("Can not start timer, already started");
@@ -235,11 +328,18 @@
             }
 
             self.interval = setInterval(self.tick, 1000);
-        }
+        };
+
+        /**
+         * Determines if Timer is running
+         * @returns {boolean} True if running, false if not
+         */
+        self.running = function() {
+            return self.interval !== undefined;
+        };
     }
 
     // Connect button
-
     function Socket() {
         var self = this;
         self.socket = undefined;
@@ -263,7 +363,7 @@
             self.socket.on("join_failed", self.onJoinFailed);
 
             self.socket.on("chess_move", self.onChessMove);
-            self.socket.on("chess_bard", self.onChessBoard);
+            self.socket.on("chess_board", self.onChessBoard);
         };
 
         /**
@@ -289,6 +389,7 @@
             gameConnectStatusEl.innerText = "Connected";
             gameConnectEl.style.display = "none";
             gameInfoEl.style.display = "block";
+
         };
 
         /**
@@ -300,6 +401,9 @@
             self.joined = false;
             gameConnectStatusEl.innerText = errMsg;
             gameConnectStatusEl.classList.add("error");
+
+            gameConnectEl.style.display = "block";
+            gameInfoEl.style.display = "none";
         };
 
         /**
@@ -308,8 +412,7 @@
          * @param data New Chess Move
          */
         self.onChessMove = function(data) {
-            var moveHtml = "<tr>";
-
+            game.addChessMove(data);
         };
 
         /**
@@ -318,26 +421,219 @@
          * @param data New Chess Board
          */
         self.onChessBoard = function(data) {
-            console.log(data);
+            game.setChessBoard(data);
         };
     }
 
-    var socket = new Socket();
-    function onConnectButtonClick() {
-        if (socket.connected() && socket.joined) {
-            gameConnectStatusEl.innerText = "Already connected";
-            gameConnectStatusEl.classList.add("error");
-        } else {
-            socket.connect(shortCodeInputEl.value);
-        }
+    function Game() {
+        var self = this;
+        self.chessBoard = undefined;
+        self.userMoves = [];
+        self.opponentMoves = [];
 
-        return false;
+        /**
+         * Set Chess Board to provided value
+         * @param chessBoard {ChessBoard} Chess Board to set Chess Board to
+         */
+        self.setChessBoard = function(chessBoard) {
+            // Set data
+            self.chessBoard = chessBoard;
+
+            // Set UI
+            if (self.chessBoard !== undefined) {
+                setTimersFromChessBoard(self.chessBoard);
+            }
+
+            // Check we have all the Chess Moves
+            if ((self.userMoves.length + self.opponentMoves.length) !== self.chessBoard.turn_number) {
+                setTimeout(self.checkInSync, 500);
+            }
+        };
+
+        /**
+         * Check that Game data is in sync with Game state on server
+         */
+        self.checkInSync = function() {
+            if (self.chessBoard === undefined) {
+                return;
+            }
+
+            if ((self.userMoves.length + self.opponentMoves.length) !== self.chessBoard.turn_number) {
+                self.fetchChessMoves("user");
+                self.fetchChessMoves("opponent");
+            }
+        };
+
+        /**
+         * Fetches Chess Board from server
+         * @param id {integer} Id of Chess Board
+         * @param callback {function} Optional callback, called like so: callback(chess_board);
+         */
+        self.fetchChessBoard = function(id, callback) {
+            // Make request
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = self._onFetchChessBoardResponse(req, callback);
+            req.open("GET", "/chess_board/" + id);
+            req.send(null);
+        };
+
+        /**
+         * Fetches Chess Board with the provided short code from the server
+         * @param shortcode {string} Short code of Chess Board to retrieve
+         * @param callback {function} Optional callback, called like so: callback(chess_board);
+         */
+        self.fetchChessBoardByShortCode = function(shortcode, callback) {
+            // Make request
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = self._onFetchChessBoardResponse(req, callback);
+            req.open("GET", "/chess_board/short_code/" + shortcode);
+            req.send(null);
+        };
+
+        /**
+         * Returns handler that gets run when fetchChessBoard result returns
+         * @param req Request
+         * @param callback {function} Callback to run after request is processed
+         * @returns {function} To be run when fetchChessBoard request finishes
+         */
+        self._onFetchChessBoardResponse = function(req, callback) {
+            return function() {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        var data = JSON.parse(req.responseText);
+
+                        // Check data
+                        if (data.chess_board) {
+                            self.setChessBoard(data.chess_board);
+
+                            // Call callback
+                            if (callback !== undefined) {
+                                callback(data.chess_board);
+                            }
+                        } else {
+                            console.error("Failed to retrieve Chess Board, no data returned from server");
+                        }
+                    } else {
+                        console.error("Failed to retrieve Chess Board, err: " + req.responseText);
+                    }
+                }
+            };
+        };
+
+        /**
+         * Sets Chess Moves for specified player
+         * @param player {string} Player to set moves for
+         * @param moves {ChessMoves[]} Chess Moves to set for player
+         * @throws {Error} If move.player is not "user" or "opponent"
+         */
+        self.setChessMoves = function(player, moves) {
+             // Check move player
+            if (player !== "user" && player !== "opponent") {
+                throw new Error("Move player must be either \"user\" or \"opponent\"");
+            }
+
+            // Clear data
+            self.resetMoves(player);
+
+            // Set data
+            if (player === "user") {
+                self.userMoves = moves;
+            } else {
+                self.opponentMoves = moves;
+            }
+        };
+
+        /**
+         * Fetches Chess Moves for specified player from Server
+         * @param player {string} Player to set moves for
+         * @param callback {function} Optional callback, called like so: callback(moves);
+         * @throws {Error} If move.player is not "user" or "opponent"
+         * @throws {Error} If Chess Board has not been fetched yet
+         */
+        self.fetchChessMoves = function(player, callback) {
+            // Check move player
+            if (player !== "user" && player !== "opponent") {
+                throw new Error("Move player must be either \"user\" or \"opponent\"");
+            }
+
+            if (self.chessBoard === undefined) {
+                throw new Error("Chess Board has not been retrieved from server yet");
+            }
+
+            // Make request
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        var data = JSON.parse(req.responseText);
+
+                        // Check data
+                        if (data.moves) {
+                            self.setChessMoves(player, data.moves);
+
+                            // Call callback
+                            if (callback !== undefined) {
+                                callback(data.moves);
+                            }
+                        } else {
+                            console.error("Failed to retrieve Chess Moves for " + player + ", no moves returned from server");
+                        }
+                    } else {
+                        console.error("Failed to retrieve Chess Moves for " + player + ", err: " + req.responseText);
+                    }
+                }
+            };
+            req.open("GET", "/chess_board/" + self.chessBoard.id + "/moves/" + player);
+            req.send(null);
+        };
+
+        /**
+         * Adds provided Chess Move to Game state
+         * @param move {ChessMove} Chess Move to add to game state
+         * @throws {Error} If move.player is not "user" or "opponent"
+         */
+        self.addChessMove = function(move) {
+            // Check move player
+            if (move.player !== "user" && move.player !== "opponent") {
+                throw new Error("Move player must be either \"user\" or \"opponent\"");
+            }
+
+            // Add move to data
+            if (move.player === "user") {
+                self.userMoves.push(move);
+            } else {
+                self.opponentMoves.push(move);
+            }
+
+            // Add move to ui
+            addChessMoveToUI(move);
+        };
+
+        /**
+         * Resets stored Chess Moves for provided player
+         * @param player Player to reset stored Chess Moves for
+         * @throws {Error} If player is not "user" or "opponent"
+         */
+        self.resetMoves = function(player) {
+            // Check move player
+            if (player !== "user" && player !== "opponent") {
+                throw new Error("Move player must be either \"user\" or \"opponent\"");
+            }
+
+            // Reset data
+            if (player === "user") {
+                self.userMoves = [];
+            } else {
+                self.opponentMoves = [];
+            }
+
+            // Reset UI
+            resetChessMovesUI(player);
+        };
     }
 
-    // Create timers
-    var fiveMinutes = 1000 * 60 * 5;
-    var pTimer = new Timer("player-timer", fiveMinutes);
-    var oTimer = new Timer("opponent-timer", fiveMinutes);
+
+
 </script>
 </body>
 </html>
