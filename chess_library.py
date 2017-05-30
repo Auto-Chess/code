@@ -45,3 +45,7 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+
+    # Gets difficulty
+    def get_difficulty(self):
+        return 0

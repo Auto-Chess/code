@@ -21,3 +21,6 @@ class LedInterface():
 
     def stop_blinking_led(self, position, blink_interval):
         print("Makes the LED stop blinking")
+
+    def stop_all(self):
+        pass
