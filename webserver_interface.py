@@ -6,7 +6,7 @@ class WebServerInterface():
     Args:
         - server_url (str): URL of webserver to interact with
     """
-    def __init__(self, server_url="https://152b62d5.ngrok.io/"):
+    def __init__(self, server_url="http://localhost/"):
         self.server_url = server_url
 
         # Mark that we haven't retrieve any ChessBoard credentials yet
