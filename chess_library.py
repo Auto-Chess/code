@@ -7,7 +7,7 @@ import chess.uci
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
-        self.difficulty = 20;
+        self.difficulty = 20
         self.board = chess.Board()
         self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
@@ -42,7 +42,7 @@ class ChessLibrary():
     # Sets difficulty. Must be between 0 and 20, 20 being hardest
     def set_difficulty(self, difficulty):
         if difficulty < 0 or difficulty > 20:
-            raise ValueError("Difficulty must be between 0 and 20")
+            raise ValueError("Difficulty must be between 0 and 20 inclusive")
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
