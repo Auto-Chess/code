@@ -265,7 +265,7 @@ def check_chess_board_secret(id):
     # Check move given by JSON
     if request.json is None:
         return make_response(jsonify({
-            'errors': ["Move was be provided in JSON format"]
+            'errors': ["JSON body required"]
         }), 400)
 
     # Check secret provided
@@ -323,6 +323,38 @@ def api_chess_board_get(chess_board_id):
     # Return
     return jsonify({
         'chess_board': board.insecure_serialize(),
+        'errors': []
+    })
+
+@app.route('/chess_board/<chess_board_id>/game_running', methods=["DELETE"])
+def api_chess_board_game_running_delete(chess_board_id):
+    # Check request
+    err_resp = check_chess_board_secret(chess_board_id)
+    if err_resp is not None:
+        return err_resp
+
+    # Get board
+    board = ChessBoard.query.filter(ChessBoard.id == chess_board_id).first()
+
+    # Check exists
+    if board is None:
+        return make_response(jsonify({
+            'errors': ["No Chess Board with provided id found"]
+        }), 404)
+
+    # Set not running
+    board.game_running = False
+
+    print("API Chess Board: {}: Stop game running".format(chess_board_id))
+
+    # Save
+    db.session.add(board)
+    db.session.commit()
+
+    # Notify
+    board.pub_to_websocket()
+
+    return jsonify({
         'errors': []
     })
 

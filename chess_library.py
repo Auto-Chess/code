@@ -20,7 +20,6 @@ class ChessLibrary():
                 self.engine.position(self.board)
 
             except ValueError as e:
-                print (e)
                 raise ValueError("Invalid move: {}".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")

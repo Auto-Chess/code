@@ -6,7 +6,7 @@ class WebServerInterface():
     Args:
         - server_url (str): URL of webserver to interact with
     """
-    def __init__(self, server_url="http://localhost/"):
+    def __init__(self, server_url="http://localhost:5000/"):
         self.server_url = server_url
 
         # Mark that we haven't retrieve any ChessBoard credentials yet
@@ -120,5 +120,29 @@ class WebServerInterface():
         if errs_dict is not None:
             return errs_dict
 
+    """Signals game ending for Chess Board. Currently this also de-registers the Chess Board
+    Returns:
+        - dict: None if success, Dict containing the `status_code` and `errors` if failure
+        
+    Raises:
+        - AssertionError: If not registered with API
+    """
     def signal_game_over(self):
-        pass
+        if not self.registered():
+            raise AssertionError("Not registered with API")
+
+        # Make request
+        headers = {
+            'Authorization': self.chess_board_secret
+        }
+
+        resp = requests.delete(self.mk_api_url("/chess_board/{}/game_running".format(self.chess_board_id)), headers=headers, json={})
+
+        # Check errors
+        errs_dict = self.check_resp_errs(resp)
+        if errs_dict is not None:
+            return errs_dict
+
+        # De-register
+        self.chess_board_id = None
+        self.chess_board_secret = None

@@ -3,6 +3,7 @@ from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
+import time
 
 from webserver_interface import WebServerInterface
 
@@ -26,15 +27,22 @@ class GameLoopEntity():
         self.paused = False
         self.welcomed = False
         self.pressed = False
+
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(2)
         self.led_interface = LedInterface()
+
         self.webserver_interface = WebServerInterface()
         self.webserver_interface.register()
+
         self.thread = Thread(target=self.start_listening)
         self.thread.start()
         self.listener = None
+        time.sleep(0.5)
+
+        self.accumulatingPresses = False
+        self.accumulatedStr = ""
 
     """ Listens for the keyboard to begin typing.
         Saves listener for later usage.
@@ -48,6 +56,7 @@ class GameLoopEntity():
             self.listener = keyboard.Listener(
                     on_press=self.on_press,
                     on_release=self.on_release)
+            self.listener.start()
         else:
             print ("start_listening: KEYBOARD NOT IMPORTED")
 
@@ -75,27 +84,41 @@ class GameLoopEntity():
     """
 
     def on_press(self, key):
-        if self.pressed == False:
-            self.pressed = True
-            try:
-                print('alphanumeric key {0} pressed'.format(key.char))
+        try:
+            if not self.pressed:
+                self.pressed = True
                 if self.paused:
                     if key.char == 'd':
                         self.lcd_interface.display("Enter Difficulty 0-20", "")
                         dif = input()
-                        dif = dif[1:len(dif)]
+                        dif = dif[-1:]
                         self.chess_library.set_difficulty(int(dif))
                         self.chess_library.get_difficulty()
                     elif key.char == 'n':
+                        self.lcd_interface.display("New game", "")
                         self.chess_library.start_game()
                         self.webserver_interface.signal_game_over()
+                        self.paused = False
                     elif key.char == 'q':
-                        self.webserver_interface.signal_game_over()
+                        self.lcd_interface.display("Quit", "")
+                        res = self.webserver_interface.signal_game_over()
+                        if res is not None:
+                            print(res)
+                        else:
+                            exit()
+
                         self.welcomed = False
-            except AttributeError:
-                print('special key {0} pressed'.format(key))
-                if key == keyboard.Key.esc:
-                    self.paused = True
+                        self.paused = False
+                elif self.accumulatingPresses:
+                    self.accumulatedStr += str(key.char)
+        except AttributeError:
+            if key == keyboard.Key.esc:
+                self.paused = True
+                self.lcd_interface.display("Paused", "d, n, or q")
+            elif not self.paused and key == keyboard.Key.enter:
+                self.accumulatingPresses = False
+            elif self.paused and key == keyboard.Key.enter:
+                self.paused = False
 
     """Listens for when a button is released
         Arg:
@@ -106,8 +129,7 @@ class GameLoopEntity():
     """
 
     def on_release(self, key):
-        pressed = False
-        print('{0} released'.format(key))
+        self.pressed = False
         if self.chess_library.is_game_over():
             # Stop listener
             return False
@@ -139,13 +161,20 @@ class GameLoopEntity():
             -ValueError: If an incorrect initial coordinate is entered the value will raise
             -ValueError: If an incorrect final coordinate is entered the value will raise
     """
-
     def gather_user_input(self):
         initial_pos = None
         final_pos = None
         getting_initial_position = True
         while getting_initial_position:
-            initial_input = input("Initial position:")
+            print("Initial position:")
+
+            self.accumulatingPresses = True
+            while self.accumulatingPresses:
+                pass
+
+            initial_input = self.accumulatedStr
+            self.accumulatedStr = ""
+
             initial_col = initial_input[0]
             initial_row = int(initial_input[1])
 
@@ -157,7 +186,15 @@ class GameLoopEntity():
 
         getting_final_position = True
         while getting_final_position:
-            final_input = input("Final position:")
+            print("Final position:")
+
+            self.accumulatingPresses = True
+            while self.accumulatingPresses:
+                pass
+
+            final_input = self.accumulatedStr
+            self.accumulatedStr = ""
+
             final_col = final_input[0]
             final_row = int(final_input[1])
 
@@ -232,7 +269,6 @@ class GameLoopEntity():
                     break
                 except ValueError as e:
                     self.lcd_interface.display("Incorrect chess move, try again.", "")
-
 
             # Get move
             opp_move = self.get_opponent_move_from_library()
