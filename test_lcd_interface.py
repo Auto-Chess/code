@@ -33,6 +33,7 @@ class TestLCDInterface(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.lcdInterface.display(first_line, second_line)
 
+    #Checking for Success; that the text has successfully displayed
     def test_display_success(self):
         self.lcdInterface.lcdCom.write = MagicMock()
         first_line = "Hello"
