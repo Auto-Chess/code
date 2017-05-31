@@ -455,9 +455,11 @@
          */
         self.checkInSync = function() {
             if (self.chessBoard === undefined) {
+                console.log("checkInSync", )
                 return;
             }
 
+            console.log("checkInSync: userMoves: " + self.userMoves.length + ", opponentMoves: " + self.opponentMoves.length + ", turn number: " + self.chessBoard.turn_number);
             if ((self.userMoves.length + self.opponentMoves.length) !== self.chessBoard.turn_number) {
                 self.fetchChessMoves("user");
                 self.fetchChessMoves("opponent");

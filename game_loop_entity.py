@@ -47,9 +47,7 @@ class GameLoopEntity():
             # Collect events until released
             self.listener = keyboard.Listener(
                     on_press=self.on_press,
-                    on_release=self.on_release) as listener:
-            self.listener = listener
-            self.listener.join()
+                    on_release=self.on_release)
         else:
             print ("start_listening: KEYBOARD NOT IMPORTED")
 
@@ -77,8 +75,8 @@ class GameLoopEntity():
     """
 
     def on_press(self, key):
-        if pressed == False:
-            pressed = True:
+        if self.pressed == False:
+            self.pressed = True
             try:
                 print('alphanumeric key {0} pressed'.format(key.char))
                 if self.paused:
@@ -110,7 +108,6 @@ class GameLoopEntity():
     def on_release(self, key):
         pressed = False
         print('{0} released'.format(key))
-            key)
         if self.chess_library.is_game_over():
             # Stop listener
             return False
