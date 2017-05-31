@@ -178,13 +178,9 @@ class GameLoopEntity():
     """
 
     def give_to_chess_library(self, initial_pos, final_pos):
-        try:
-            chessMove = ChessMove(initial_pos, final_pos)
-            self.chess_library.hand_off(chessMove)
-            self.webserver_interface.push_player_move(chessMove)
-        except ValueError as err:
-            self.lcd_interface.display("Chess move is invalid.")
-            self.prompt_user_for_input()
+        chessMove = ChessMove(initial_pos, final_pos)
+        self.chess_library.hand_off(chessMove)
+        self.webserver_interface.push_player_move(chessMove)
 
     """ Takes the opponent move from the chess engine.
         Pushes opponent move to webserver.
@@ -224,14 +220,19 @@ class GameLoopEntity():
         self.webserver_interface.register()
         i = 1
         while not self.chess_library.is_game_over():
+            while True:
+                # Prompt user for input
+                self.prompt_user_for_input()
+                user_move = self.gather_user_input()
+                self.led_interface.stop_all()
 
-            # Prompt user for input
-            self.prompt_user_for_input()
-            user_move = self.gather_user_input()
-            self.led_interface.stop_all()
+                try:
+                    # Give to chess lib
+                    self.give_to_chess_library(user_move.init_pos, user_move.final_pos)
+                    break
+                except ValueError as e:
+                    self.lcd_interface.display("Incorrect chess move, try again.", "")
 
-            # Give to chess lib
-            self.give_to_chess_library(user_move.init_pos, user_move.final_pos)
 
             # Get move
             opp_move = self.get_opponent_move_from_library()

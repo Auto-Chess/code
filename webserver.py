@@ -26,6 +26,7 @@ if ENVIRONMENT == ENV_TEST:
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/auto-chess'
 
+
 #app.config['REDIS_URL'] = 'redis://:@localhost:6379/0'
 app.config['SECRET_KEY'] = random_string()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
