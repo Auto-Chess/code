@@ -7,11 +7,11 @@ import chess.uci
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
+        self.difficulty = 20;
         self.board = chess.Board()
         self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
 
-    # Give a ChessMove object to the third-party library, push it to board if ok
     def hand_off(self, move):
         if isinstance(move, ChessMove):
             try:
@@ -46,12 +46,16 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+            self.difficulty = difficulty
 
     # Clears the board and then tells Stockfish a new game has started
     def start_game(self):
         self.board.reset()
         # self.engine.position(self.board)
         self.engine.ucinewgame()
+
+    def get_difficulty(self):
+        return self.difficulty
 
 
 '''
