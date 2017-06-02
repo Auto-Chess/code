@@ -29,7 +29,7 @@ class ChessLibrary():
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 
-    """Asks Chess Library for a move, pushes it to board, and returns it as a ChessMove object
+    """Asks Chess Library for a move, pushes it to board, and then returns it as a ChessMove object
     Returns:
         - A ChessMove object which shows where the chess engine decided to move
     """
@@ -54,7 +54,7 @@ class ChessLibrary():
       
     """Sets difficulty. Must be between 0 and 20, 20 being hardest
     Raises:
-        - ValueError: Raised if the difficulty is not within legal boundaries 
+        - ValueError: Raised if the difficulty is not within legal boundaries
     """
     def set_difficulty(self, difficulty):
         if difficulty < 0 or difficulty > 20:
