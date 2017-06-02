@@ -7,10 +7,11 @@ import chess.uci
 class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
+        self.difficulty = 20
         self.board = chess.Board()
         self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
-
+        
     """Gives a ChessMove object to the third-party library, which is then pushed to the board if ok
     Arg:
         - move: A ChessMove object which is then translated into a UCI move
@@ -24,7 +25,7 @@ class ChessLibrary():
                 self.board.push_uci(move.__str__())
                 self.engine.position(self.board)
             except ValueError:
-                print("Invalid move: {}!".format(str(move)))
+                raise ValueError("Invalid move: {}!".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 
@@ -34,6 +35,7 @@ class ChessLibrary():
     """
     def get_move(self):
         command = self.engine.go(movetime=2000, async_callback=True)
+        print(type(command))
         best_move, ponder = command.result()
         bm = str(best_move)
 
@@ -60,3 +62,23 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+            self.difficulty = difficulty
+
+    # Clears the board and then tells Stockfish a new game has started
+    def start_game(self):
+        self.board.reset()
+        # self.engine.position(self.board)
+        self.engine.ucinewgame()
+
+    def get_difficulty(self):
+        return self.difficulty
+
+
+'''
+y = ChessLibrary()
+a = ChessPosition("e", 2)
+b = ChessPosition("e", 4)
+x = ChessMove(a, b)
+y.hand_off(x)
+y.get_move()
+'''
