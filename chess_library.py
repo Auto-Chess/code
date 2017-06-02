@@ -52,7 +52,7 @@ class ChessLibrary():
       
     """Sets difficulty. Must be between 0 and 20, 20 being hardest
     Raises:
-        - ValueError: Raised if the difficulty is not within legal boundaries 
+        - ValueError: Raised if the difficulty is not within legal boundaries
     """
     def set_difficulty(self, difficulty):
         if difficulty < 0 or difficulty > 20:
