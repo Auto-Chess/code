@@ -33,7 +33,7 @@ class GameLoopEntity():
         self.chess_library.set_difficulty(2)
         self.led_interface = LedInterface()
 
-        self.webserver_interface = WebServerInterface()
+        self.webserver_interface = WebServerInterface("http://fdc1ab42.ngrok.io")
         self.webserver_interface.register()
 
         self.thread = Thread(target=self.start_listening)

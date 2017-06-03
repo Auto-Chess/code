@@ -13,6 +13,9 @@ class LEDMatrix():
 
         self.on = []
 
+    def all_off(self):
+        self.on = []
+
     def setup(self):
         GPIO.setmode(GPIO.BCM)
 
@@ -108,38 +111,23 @@ class LEDMatrix():
                     self.turn_all_to_except(1, self.lows, y)
 
                     run_count += 1
-                    time.sleep(0.1 / len(self.on))
+                    time.sleep(0.01 / len(self.on))
 
             except KeyboardInterrupt as e:
                 print("Stopping")
+                self.cleanup()
+                exit()
                 return;
 
-matrix = LEDMatrix(lows=[26, 16], highs=[20, 21])
+matrix = LEDMatrix(lows=[9, 11, 5, 6, 13, 19, 26, 21], highs=[2, 3, 4, 17, 27, 22, 10, 20])
 matrix.setup()
 
-matrix.add_on(0, 0)
-matrix.add_on(1, 0)
-matrix.add_on(0, 1)
-matrix.add_on(1, 1)
-matrix.run()
+while True:
+    for x in range(8):
+        for y in range(8):
+            matrix.add_on(x, y)
 
-for i in range(20):
-    matrix.remove_on(0, 1)
-    matrix.remove_on(1, 0)
-    try:
-        matrix.add_on(0, 0)
-        matrix.add_on(1, 1)
-    except ValueError as e:
-        pass
-    matrix.run(run_max=100)
-
-    matrix.remove_on(0, 0)
-    matrix.remove_on(1, 1)
-    try:
-        matrix.add_on(0, 1)
-        matrix.add_on(1, 0)
-    except ValueError as e:
-        pass
-    matrix.run(run_max=100)
+            matrix.run(run_max=3)
+            matrix.all_off()
 
 matrix.cleanup()
