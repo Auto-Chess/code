@@ -27,7 +27,7 @@ class GameLoopEntity():
         self.chess_library.set_difficulty(0)
         self.led_interface = LedInterface()
 
-        self.webserver_interface = WebServerInterface()
+        self.webserver_interface = WebServerInterface("http://6c11a37b.ngrok.io/")
         self.webserver_interface.register()
 
 
@@ -75,7 +75,10 @@ class GameLoopEntity():
                 self.paused = False
 
 
-    """Sends a string of instructions to the LCD display
+    """
+    Sends a string of instructions to the LCD display
+    Takes the initial and final position after calling gather_user_input twice
+    Treates and returns a chessmove from the positions
         Returns:
             -str: Welcome user to the game
             -str: Tells user to give their input
@@ -95,29 +98,26 @@ class GameLoopEntity():
 
         return move
 
-    """ Gathers the user input by taking in an initial position and final position
-        Each position is made of an initial column and initial row
-        and an final column and final row
-        Creates a chess position from the initial column and initial row
-        does the same for the final position.
-        Creates a move from the initial and final position
+    """ Gathers the user input by taking in an position
+        Each position is made of an column and row
+        Creates a chess position from the column and row
         Returns:
             -str: Asks user for initial position
             -str: Asks user for final position
             -str: Chess move
 
        Raises:
-            -ValueError: If an incorrect initial coordinate is entered the value will raise
-            -ValueError: If an incorrect final coordinate is entered the value will raise
+            -ValueError: If an incorrect coordinate is entered the value will raise
+
     """
     def gather_user_input(self, prompt):
         final_pos = None
 
         while True:
-            initial_input = input("{} Position:".format(prompt))
+            user_input = input("{} Position:".format(prompt))
 
-            col = initial_input[0]
-            row = int(initial_input[1])
+            col = user_input[0]
+            row = int(user_input[1])
 
             try:
                 position = ChessPosition(col, row)
