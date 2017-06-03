@@ -50,7 +50,6 @@ class GameLoopEntity():
             self.lcd_interface.display("New game", "")
             self.chess_library.start_game()
             self.webserver_interface.signal_game_over()
-            self.paused = False
         elif user_input == 'q':
             self.lcd_interface.display("Quit", "")
             res = self.webserver_interface.signal_game_over()

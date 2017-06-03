@@ -12,6 +12,9 @@ class ChessLibrary():
         self.engine.uci()
 
 
+    def start_game(self):
+
+
     # Give a ChessMove object to the third-party library, push it to board if ok
     def hand_off(self, move):
         if isinstance(move, ChessMove):
