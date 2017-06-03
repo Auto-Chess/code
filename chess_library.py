@@ -13,6 +13,7 @@ class ChessLibrary():
 
 
     def start_game(self):
+        pass
 
 
     # Give a ChessMove object to the third-party library, push it to board if ok
