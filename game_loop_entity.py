@@ -33,8 +33,7 @@ class GameLoopEntity():
         self.chess_library.set_difficulty(2)
         self.led_interface = LedInterface()
 
-        self.webserver_interface = WebServerInterface("http://fdc1ab42.ngrok.io")
-        self.webserver_interface.register()
+        self.webserver_interface = WebServerInterface()
 
         self.thread = Thread(target=self.start_listening)
         self.thread.start()
@@ -97,13 +96,15 @@ class GameLoopEntity():
                     elif key.char == 'n':
                         self.lcd_interface.display("New game", "")
                         self.chess_library.start_game()
-                        self.webserver_interface.signal_game_over()
+                        errs = self.webserver_interface.signal_game_over()
+                        if errs is not None:
+                            print("Game Loop Entity: Failed to signal game over to website: {}".format(errs))
                         self.paused = False
                     elif key.char == 'q':
                         self.lcd_interface.display("Quit", "")
                         res = self.webserver_interface.signal_game_over()
                         if res is not None:
-                            print(res)
+                            print("Game Loop Entity: Failed to signal game over to website: {}".format(errs))
                         else:
                             exit()
 
@@ -217,7 +218,9 @@ class GameLoopEntity():
     def give_to_chess_library(self, initial_pos, final_pos):
         chessMove = ChessMove(initial_pos, final_pos)
         self.chess_library.hand_off(chessMove)
-        self.webserver_interface.push_player_move(chessMove)
+        errs = self.webserver_interface.push_player_move(chessMove)
+        if errs is not None:
+            print("Game Loop Entity: Failed to push player move to website: {}".format(errs))
 
     """ Takes the opponent move from the chess engine.
         Pushes opponent move to webserver.
@@ -227,7 +230,9 @@ class GameLoopEntity():
 
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.get_move()
-        self.webserver_interface.push_opponent_move(opponentMove)
+        errs = self.webserver_interface.push_opponent_move(opponentMove)
+        if errs is not None:
+            print("Game Loop Entity: Failed to push opponent move to website: {}".format(errs))
         return opponentMove
 
     """Sends the opponent move the LED board.
@@ -254,7 +259,9 @@ class GameLoopEntity():
     """
 
     def run(self):
-        self.webserver_interface.register()
+        errs = self.webserver_interface.register()
+        if errs is not None:
+            print("Game Loop Entity: Failed to register chess board {}".format(errs))
         i = 1
         while not self.chess_library.is_game_over():
             while True:
@@ -276,4 +283,6 @@ class GameLoopEntity():
             # Show move
             self.show_opponent_move(opp_move.init_pos, opp_move.final_pos)
 
-        self.webserver_interface.signal_game_over()
+        errs = self.webserver_interface.signal_game_over()
+        if errs is not None:
+            print("Game Loop Entity: Failed to signal game over: {}".format(errs))
