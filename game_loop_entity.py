@@ -39,7 +39,7 @@ class GameLoopEntity():
 
     def pause(self):
         self.lcd_interface.display("Paused", "d, n, or q")
-        user_input = input("{} Position:".format(prompt))
+        user_input = input()
         if user_input == 'd':
             self.lcd_interface.display("Enter Difficulty 0-20", "")
             dif = input()
@@ -79,8 +79,6 @@ class GameLoopEntity():
             self.welcomed = True
             self.lcd_interface.display("Welcome to Auto Chess", "")
 
-        self.lcd_interface.display("Enter initial then final position: ", "")
-
         initial_pos = self.gather_user_input("Initial")
         final_pos = self.gather_user_input("Final")
 
@@ -106,22 +104,16 @@ class GameLoopEntity():
         while True:
             while True:
                 self.lcd_interface.display("{} Position:".format(prompt), "")
-                user_input = input("{} Position:".format(prompt))
+                user_input = input()
 
                 if user_input == "pause":
                     self.pause()
-
                 else:
                     break
-
-
-
-
-
-            col = user_input[0]
-            row = int(user_input[1])
-
             try:
+                col = user_input[0]
+                row = int(user_input[1])
+
                 position = ChessPosition(col, row)
                 return position
             except ValueError:
