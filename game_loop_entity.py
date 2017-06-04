@@ -122,10 +122,9 @@ class GameLoopEntity():
             final_pos(str): The given input in previous method
     """
 
-    def give_to_chess_library(self, initial_pos, final_pos):
-        chessMove = ChessMove(initial_pos, final_pos)
-        self.chess_library.hand_off(chessMove)
-        errs = self.webserver_interface.push_player_move(chessMove)
+    def give_to_chess_library(self, move):
+        self.chess_library.hand_off(move)
+        errs = self.webserver_interface.push_player_move(move)
         if errs is not None:
             print("Game Loop Entity: Failed to push player move to website: {}".format(errs))
 
@@ -169,6 +168,10 @@ class GameLoopEntity():
         errs = self.webserver_interface.register()
         if errs is not None:
             print("Game Loop Entity: Failed to register chess board {}".format(errs))
+        else:
+            self.lcd_interface.display("Website code", self.webserver_interface.chess_board_short_code)
+            input()
+
         i = 1
         while not self.chess_library.is_game_over():
             while True:

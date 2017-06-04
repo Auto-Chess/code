@@ -13,6 +13,7 @@ class WebServerInterface():
         # Mark that we haven't retrieve any ChessBoard credentials yet
         self.chess_board_id = None
         self.chess_board_secret = None
+        self.chess_board_short_code = None
 
     """Make complete API url
     Args:
@@ -55,7 +56,7 @@ class WebServerInterface():
         - bool: True if already registered, False if not
     """
     def registered(self):
-        if self.chess_board_id is None or self.chess_board_secret is None:
+        if self.chess_board_id is None or self.chess_board_secret is None or self.chess_board_short_code is None:
             return False
 
         return True
@@ -79,6 +80,7 @@ class WebServerInterface():
             data = resp.json()
             self.chess_board_id = data['chess_board']['id']
             self.chess_board_secret = data['chess_board']['secret']
+            self.chess_board_short_code = data['chess_board']['short_code']
 
     def push_opponent_move(self, move):
         self._push_chess_move('opponent', move)
@@ -152,3 +154,26 @@ class WebServerInterface():
         # De-register
         self.chess_board_id = None
         self.chess_board_secret = None
+        self.chess_board_short_code = None
+
+    """Gets Chess Board from server
+    Raises:
+        - AssertionError: If not registered with API
+    """
+    def get_chess_board(self):
+        if not self.registered():
+            raise AssertionError("Not registered with API")
+
+        # Make request
+        headers = {
+            'Authorization': self.chess_board_secret
+        }
+
+        resp = requests.get(self.mk_api_url("/chess_board/{}".format(self.chess_board_id)))
+
+        # Check errors
+        errs_dict = self.check_resp_errs(resp)
+        if errs_dict is not None:
+            return errs_dict
+
+        return resp.json()
