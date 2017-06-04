@@ -24,6 +24,11 @@ setup-file:
 setup:
 	sudo bash -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 	sudo iptables -t nat -A POSTROUTING -o wlp58s0 -j MASQUERADE
+	sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+	sudo iptables -A FORWARD -i enp57s0u1 -o wlp58s0 -j ACCEPT
+	sudo iptables -I INPUT -p udp --dport 67 -i enp57s0u1 -j ACCEPT
+	sudo iptables -I INPUT -p udp --dport 53 -s 10.0.0.0/24 -j ACCEPT
+	sudo iptables -I INPUT -p tcp --dport 53 -s 10.0.0.0/24 -j ACCEPT
 	sudo ifconfig enp57s0u1 10.0.0.1 netmask 255.255.255.0 up
 	sudo systemctl start dhcpd4.service
 
