@@ -24,7 +24,7 @@ class GameLoopEntity():
         self.lcd_interface = LCDInterface("hardware")
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(0)
-        self.led_interface = LedInterface(lows=[9, 11, 5, 6, 13, 19, 26, 21], highs=[2, 3, 4, 17, 27, 22, 10, 20])
+        self.led_interface = LedInterface([9, 11, 5, 6, 13, 19, 26, 21], [2, 3, 4, 17, 27, 22, 10, 20], "hardware")
         self.led_interface.setup()
         self.led_interface.start_run_in_thread()
 

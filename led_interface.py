@@ -5,8 +5,7 @@ import threading
 from chess_position import ChessPosition
 
 class LedInterface():
-
-    def __init__(self, operation_mode="hardware", lows, highs):
+    def __init__(self, lows, highs, operation_mode="software"):
         self.operation_mode = operation_mode
 
         if self.operation_mode == "hardware":
@@ -101,8 +100,8 @@ class LedInterface():
             self.blinking = []
 
     def run(self):
-        while True
-            with self.blinking_lock
+        while True:
+            with self.blinking_lock:
                 for pos in self.blinking:
                     x = pos[0]
                     y = pos[1]
