@@ -22,10 +22,11 @@ class ChessLibrary():
     def hand_off(self, move):
         if isinstance(move, ChessMove):
             try:
-                self.board.push_uci(move.__str__())
+                self.board.push_uci(str(move))
                 self.engine.position(self.board)
-            except ValueError:
-                raise ValueError("Invalid move: {}!".format(str(move)))
+
+            except ValueError as e:
+                raise ValueError("Invalid move: {}".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 
@@ -43,7 +44,11 @@ class ChessLibrary():
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
-        return ChessMove(init, final)
+        move = ChessMove(init, final)
+
+        self.board.push_uci(str(move))
+        return move
+
 
     """Evaluates whether the game is over or not
     Returns:
@@ -72,13 +77,3 @@ class ChessLibrary():
 
     def get_difficulty(self):
         return self.difficulty
-
-
-'''
-y = ChessLibrary()
-a = ChessPosition("e", 2)
-b = ChessPosition("e", 4)
-x = ChessMove(a, b)
-y.hand_off(x)
-y.get_move()
-'''
