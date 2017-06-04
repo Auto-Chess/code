@@ -3,132 +3,195 @@ from led_interface import LedInterface
 from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
+import time
 
 from webserver_interface import WebServerInterface
-from pynput import keyboard
-from threading import Thread
 
 
+"""Game loop entity class
+Return:
+    -str: Asks user for initial input
+    -int: Gives user input to chess engine
+    -int: Retrieves the opponent move from the chess engine
+    -str: Shows opponent move on led board
+"""
 class GameLoopEntity():
 
     def __init__(self):
-        self.paused = False
         self.welcomed = False
+        self.pressed = False
+
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
+        self.chess_library.set_difficulty(0)
         self.led_interface = LedInterface()
+
         self.webserver_interface = WebServerInterface()
-        self.webserver_interface.register()
-        self.thread = Thread(target=self.start_listening)
-        self.thread.start()
 
-    def start_listening(self):
-        # Collect events until released
-        with keyboard.Listener(
-                on_press=self.on_press,
-                on_release=self.on_release) as listener:
-            listener.join()
 
-    def on_press(self, key):
-        try:
-            print('alphanumeric key {0} pressed'.format(key.char))
-            if self.paused:
-                if key.char == 'd':
-                    self.lcd_interface.display("Enter Difficulty 0-20", "")
-                    dif = input()
-                    dif = dif[1:len(dif)]
-                    self.chess_library.set_difficulty(int(dif))
-                    self.chess_library.get_difficulty()
-                elif key.char == 'n':
-                    self.chess_library.start_game
-                    self.webserver_interface.signal_game_over
-                elif key.char == 'q':
-                    self.webserver_interface.signal_game_over
-                    self.welcomed = False
-        except AttributeError:
-            'special key {0} pressed'.format(key)
-            if key == keyboard.Key.esc:
-                self.paused = True
+    """ Listens for the keyboard to begin typing.
+        Saves listener for later usage.
+        Return:
+            -str: Keyboard is not imported
+    """
 
-    def on_release(self, key):
-        '{0} released'.format(
-            key)
-        if self.chess_library.is_game_over():
-            # Stop listener
-            return False
+    def pause(self):
+        self.lcd_interface.display("Paused", "d, n, or q")
+        user_input = input()
+        if user_input == 'd':
+            self.lcd_interface.display("Enter Difficulty 0-20", "")
+            dif = input()
+            dif = dif[-1:]
+            self.chess_library.set_difficulty(int(dif))
+            self.chess_library.get_difficulty()
+        elif user_input == 'n':
+            self.lcd_interface.display("New game", "")
+            self.chess_library.start_game()
+            self.webserver_interface.signal_game_over()
+        elif user_input == 'q':
+            self.lcd_interface.display("Quit", "")
+            res = self.webserver_interface.signal_game_over()
+            if res is not None:
+                print(res)
+            else:
+                exit()
+
+            self.welcomed = False
+
+    """
+    Sends a string of instructions to the LCD display
+    Takes the initial and final position after calling gather_user_input twice
+    Treates and returns a chessmove from the positions
+        Returns:
+            -str: Welcome user to the game
+            -str: Tells user to give their input
+    """
 
     def prompt_user_for_input(self):
         if not self.welcomed:
             self.welcomed = True
-            self.lcd_interface.display("Welcome to Auto Chess","")
-        self.lcd_interface.display("Enter initial then final position: ","")
+            self.lcd_interface.display("Welcome to Auto Chess", "")
 
-    def gather_user_input(self):
-        initial_pos = None
-        final_pos = None
-        getting_initial_position = True
-        while getting_initial_position:
-            initial_input = input("Initial position:")
-            initial_col = initial_input[0]
-            initial_row = int(initial_input[1])
+        initial_pos = self.gather_user_input("Initial")
+        final_pos = self.gather_user_input("Final")
 
-            try:
-                initial_pos = ChessPosition(initial_col, initial_row)
-                getting_initial_position = False
-            except ValueError:
-                self.lcd_interface.display("Incorrect initial coordinate, try again.", "")
-
-        getting_final_position = True
-        while getting_final_position:
-            final_input = input("Final position:")
-            final_col = final_input[0]
-            final_row = int(final_input[1])
-
-            try:
-                final_pos = ChessPosition(final_col, final_row)
-                getting_final_position = False
-            except ValueError as err:
-                self.lcd_interface.display("Incorrect final coordinate, try again.", "")
         move = ChessMove(initial_pos, final_pos)
+
         return move
 
-    def give_to_chess_library(self,initial_pos, final_pos):
-        chessMove = ChessMove(initial_pos, final_pos)
-        self.chess_library.hand_off(chessMove)
-        self.webserver_interface.push_player_move(chessMove)
-        #TODO when chess library class is made
+    """ Gathers the user input by taking in an position
+        Each position is made of an column and row
+        Creates a chess position from the column and row
+        Returns:
+            -str: Asks user for initial position
+            -str: Asks user for final position
+            -str: Chess move
+
+       Raises:
+            -ValueError: If an incorrect coordinate is entered the value will raise
+
+    """
+    def gather_user_input(self, prompt):
+        final_pos = None
+
+        while True:
+            while True:
+                self.lcd_interface.display("{} Position:".format(prompt), "")
+                user_input = input()
+
+                if user_input == "pause":
+                    self.pause()
+                else:
+                    break
+            try:
+                col = user_input[0]
+                row = int(user_input[1])
+
+                position = ChessPosition(col, row)
+                return position
+            except ValueError:
+                self.lcd_interface.display("Incorrect coordinate, try again.", "")
+
+
+
+    """ Gives the inputted initial and final position to the chess engine.
+        Creates a chessMove from the positions.
+        Sends the chess move to the webserver interface.
+        Args:
+            initial_pos(str): The given input in previous method
+            final_pos(str): The given input in previous method
+    """
+
+    def give_to_chess_library(self, move):
+        self.chess_library.hand_off(move)
+        errs = self.webserver_interface.push_player_move(move)
+        if errs is not None:
+            print("Game Loop Entity: Failed to push player move to website: {}".format(errs))
+
+    """ Takes the opponent move from the chess engine.
+        Pushes opponent move to webserver.
+        Returns:
+            -int: Opponent move from chess engine
+    """
 
     def get_opponent_move_from_library(self):
         opponentMove = self.chess_library.get_move()
-        self.webserver_interface.push_opponent_move()
+        errs = self.webserver_interface.push_opponent_move(opponentMove)
+        if errs is not None:
+            print("Game Loop Entity: Failed to push opponent move to website: {}".format(errs))
         return opponentMove
 
-    def show_opponent_move(self,initial_pos, final_pos):
+    """Sends the opponent move the LED board.
+        Args:
+            initial_pos(str): The opponents initial position
+            final_pos(str): The opponents final position
+    """
+
+    def show_opponent_move(self, initial_pos, final_pos):
         self.led_interface.turn_on_led(initial_pos)
-        self.led_interface.start_blinking_led(final_pos,1)
-        
+        self.led_interface.start_blinking_led(final_pos, 1)
+
+    """ Runs the game loop entity.
+        Checks if game loop is in a game over stage.
+        Prompts the user for input
+        Gives the initial and final position to gather user input method
+        Send the initial position and final position to the chess library
+        Gets the opponents initial and final position from the chess engine
+        Shows the opponents move on the LED board.
+        Loops until game is said to be over.
+        Sends game termination to the web server.
+        Returns:
+            -str: Tells user the numbered round in the game
+    """
+
     def run(self):
-        self.webserver_interface.register
+        errs = self.webserver_interface.register()
+        if errs is not None:
+            print("Game Loop Entity: Failed to register chess board {}".format(errs))
+        else:
+            self.lcd_interface.display("Website code", self.webserver_interface.chess_board_short_code)
+            input()
+
         i = 1
         while not self.chess_library.is_game_over():
-            print()
-            print("Round #{}".format(i + 1))
-            print("==========")
+            while True:
+                # Prompt user for input
+                user_move = self.prompt_user_for_input()
+                self.led_interface.stop_all()
 
-            # Prompt user for input
-            self.prompt_user_for_input()
-            initial_pos, final_pos = self.gather_user_input()
-            self.led_interface.stop_all()
-
-            # Give to chess lib
-            self.give_to_chess_library(initial_pos, final_pos)
+                try:
+                    # Give to chess lib
+                    self.give_to_chess_library(user_move)
+                    break
+                except ValueError as e:
+                    self.lcd_interface.display("Incorrect chess move, try again.", "")
 
             # Get move
-            opp_initial_pos, opp_final_pos = self.get_opponent_move_from_library()
+            opp_move = self.get_opponent_move_from_library()
 
             # Show move
-            self.show_opponent_move(opp_initial_pos, opp_final_pos)
+            self.show_opponent_move(opp_move.init_pos, opp_move.final_pos)
 
-        self.webserver_interface.signal_game_over
-
-
+        errs = self.webserver_interface.signal_game_over()
+        if errs is not None:
+            print("Game Loop Entity: Failed to signal game over: {}".format(errs))

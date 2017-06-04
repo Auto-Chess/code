@@ -11,14 +11,20 @@ class ChessLibrary():
         self.engine = chess.uci.popen_engine("stockfish_8")
         self.engine.uci()
 
+
+    def start_game(self):
+        pass
+
+
     # Give a ChessMove object to the third-party library, push it to board if ok
     def hand_off(self, move):
         if isinstance(move, ChessMove):
             try:
-                self.board.push_uci(move.__str__())
+                self.board.push_uci(str(move))
                 self.engine.position(self.board)
-            except ValueError:
-                raise ValueError("Invalid move: {}!".format(str(move)))
+
+            except ValueError as e:
+                raise ValueError("Invalid move: {}".format(str(move)))
         else:
             raise TypeError("Parameter of hand_off must be of type ChessMove")
 
@@ -32,7 +38,11 @@ class ChessLibrary():
         init = ChessPosition(str(bm[:1]), int(bm[1:-2]))
         final = ChessPosition(str(bm[2:-1]), int(bm[3:]))
 
-        return ChessMove(init, final)
+        move = ChessMove(init, final)
+
+        self.board.push_uci(str(move))
+        return move
+
 
     # Self explanatory
     def is_game_over(self):
@@ -45,3 +55,7 @@ class ChessLibrary():
         else:
             new_options = {'Skill Level': difficulty}
             self.engine.setoption(new_options)
+
+    # Gets difficulty
+    def get_difficulty(self):
+        return 0
