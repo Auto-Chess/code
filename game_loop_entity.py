@@ -21,7 +21,7 @@ class GameLoopEntity():
         self.welcomed = False
         self.pressed = False
 
-        self.lcd_interface = LCDInterface()
+        self.lcd_interface = LCDInterface("hardware")
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(0)
         self.led_interface = LedInterface(lows=[9, 11, 5, 6, 13, 19, 26, 21], highs=[2, 3, 4, 17, 27, 22, 10, 20])
@@ -50,11 +50,12 @@ class GameLoopEntity():
             self.lcd_interface.display("New game", "")
             self.chess_library.start_game()
             self.webserver_interface.signal_game_over()
+
         elif user_input == 'q':
             self.lcd_interface.display("Quit", "")
             res = self.webserver_interface.signal_game_over()
             if res is not None:
-                print(res)
+                print("Error signalling game over: {}".format(res))
             else:
                 exit()
 
@@ -72,7 +73,7 @@ class GameLoopEntity():
     def prompt_user_for_input(self):
         if not self.welcomed:
             self.welcomed = True
-            self.lcd_interface.display("Welcome to Auto Chess", "")
+            self.lcd_interface.display("Welcome to Auto", "Chess")
 
         initial_pos = self.gather_user_input("Initial")
         final_pos = self.gather_user_input("Final")
@@ -94,11 +95,9 @@ class GameLoopEntity():
 
     """
     def gather_user_input(self, prompt):
-        final_pos = None
-
         while True:
             while True:
-                self.lcd_interface.display("{} Position:".format(prompt), "")
+                self.lcd_interface.display(prompt, "position")
                 user_input = input()
 
                 if user_input == "pause":
@@ -186,13 +185,15 @@ class GameLoopEntity():
                     self.give_to_chess_library(user_move)
                     break
                 except ValueError as e:
-                    self.lcd_interface.display("Incorrect chess move, try again.", "")
+                    self.lcd_interface.display("Bad move", "Try again")
 
             # Get move
             opp_move = self.get_opponent_move_from_library()
 
             # Show move
             self.show_opponent_move(opp_move.init_pos, opp_move.final_pos)
+            self.lcd_interface.display("Move opp.", "piece")
+            input()
 
         errs = self.webserver_interface.signal_game_over()
         if errs is not None:

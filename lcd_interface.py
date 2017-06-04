@@ -3,7 +3,7 @@ import serial
 class LCDInterface():
 
     #Method to check that the code is running in the hardware
-    def __init__(self, operation_mode="hardware"):
+    def __init__(self, operation_mode="software"):
         self.operation_mode = operation_mode
         if (self.operation_mode == "hardware"):
             self.lcdCom = serial.Serial(
@@ -20,6 +20,8 @@ class LCDInterface():
             raise ValueError("First line of text can not be more than 16 characters")
         if len(second_line) > 16:
             raise ValueError("Second line of text can not be more than 16 characters")
+
+        self.clear()
 
         if (self.operation_mode=="hardware"):
             self.lcdCom.write(bytes(str(first_line), "ASCII"))

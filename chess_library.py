@@ -36,7 +36,6 @@ class ChessLibrary():
     """
     def get_move(self):
         command = self.engine.go(movetime=2000, async_callback=True)
-        print(type(command))
         best_move, ponder = command.result()
         bm = str(best_move)
 

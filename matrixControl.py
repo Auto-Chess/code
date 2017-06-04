@@ -94,15 +94,12 @@ class LEDMatrix():
         while run_max is None or run_count < run_max:
             try:
                 # For each coordinate to turn on
-                print("Running Matrix for the {}th time".format(run_count))
                 for coord in self.on:
                     x = coord[0]
                     y = coord[1]
 
                     high_pin = self.highs[x]
                     low_pin = self.lows[y]
-
-                    print("    ({}, {}) => pins: (high_pin, low_pin) = ({}, {})".format(x, y, high_pin, low_pin))
 
                     GPIO.output(high_pin, 1)
                     self.turn_all_to_except(0, self.highs, x)
