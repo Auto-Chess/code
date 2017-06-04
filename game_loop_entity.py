@@ -24,9 +24,11 @@ class GameLoopEntity():
         self.lcd_interface = LCDInterface()
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(0)
-        self.led_interface = LedInterface()
+        self.led_interface = LedInterface(lows=[9, 11, 5, 6, 13, 19, 26, 21], highs=[2, 3, 4, 17, 27, 22, 10, 20])
+        self.led_interface.setup()
+        self.led_interface.start_run_in_thread()
 
-        self.webserver_interface = WebServerInterface()
+        self.webserver_interface = WebServerInterface("http://autochess.noahhuppert.com")
 
 
     """ Listens for the keyboard to begin typing.

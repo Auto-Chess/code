@@ -1,5 +1,5 @@
 import requests
-from json.decoder import JSONDecodeError
+#from json.decoder import JSONDecodeError
 
 """Class which interacts with API provided by webserver"""
 class WebServerInterface():
@@ -35,7 +35,7 @@ class WebServerInterface():
         data = {}
         try:
             data = resp.json()
-        except JSONDecodeError as e:
+        except Exception as e:
             return dict(status_code=500, errors=["An internal error occurred"])
 
         if 'errors' in data:

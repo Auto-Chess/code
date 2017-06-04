@@ -9,7 +9,7 @@ class ChessLibrary():
         # Setup Stockfish engine
         self.difficulty = 20
         self.board = chess.Board()
-        self.engine = chess.uci.popen_engine("stockfish_8")
+        self.engine = chess.uci.popen_engine("stockfish")
         self.engine.uci()
         
     """Gives a ChessMove object to the third-party library, which is then pushed to the board if ok
