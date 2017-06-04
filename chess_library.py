@@ -8,7 +8,7 @@ class ChessLibrary():
     def __init__(self):
         # Setup Stockfish engine
         self.board = chess.Board()
-        self.engine = chess.uci.popen_engine("stockfish_8")
+        self.engine = chess.uci.popen_engine("stockfish")
         self.engine.uci()
 
 
