@@ -192,3 +192,51 @@ The steps depend on the distribution of Linux you are running.
     - Search around and see if your distribution has an official package to install
     - Otherwise go to the [Python 3.6 webpage](https://www.python.org/downloads/release/python-360/) and download the best file and install
 - Now that you are done go back up to the [Writting Code section](#markdown-header-writting-code)
+
+# Connecting
+- `sudo bash -c "echo 1 > /proc/sys/net/ipv4/ip_forward"`
+- `sudo iptables -t nat -A POSTROUTING -o wlp58s0 -j MASQUERADE`
+- `sudo ifconfig enp57s0u1 10.0.0.1 netmask 255.255.255.0 up`
+- to `/etc/dhcpd.conf` > 
+```
+subnet 10.0.0.0 netmask 255.255.255.0 {
+    range 10.0.0.100 10.0.0.120;
+    option routers 10.0.0.1;
+    option domain-name-servers the-ip-address-you-have-in-etc-resolv.conf;
+}
+```
+- `sudo systemctl start dhcpd4.service`
+
+# LED Connections
+Pins 12 and 13 provide power - Connect with 2 resistors
+Pins 20 and 21 sink current
+
+Breadboard setup:
+Left side = 0
+Right side = 1
+
+13 provides power to (+) column of left side (0)
+12 provides power to (+) column of right side (1)
+
+20 sinks current from (-) column of left side (0)
+21 sinks current from (-) column of right side (1)
+
+(+) column represents X coordinate in the matrix
+(-) column represents Y coordinate in the matrix
+
+LED setup
+(0, 0) LED 
+- (+) is connected to left (+) column (x=0)
+- (-) is connected to left (-) column (y=0)
+
+(1, 0) LED
+- (+) is connected to right (+) column (x=1)
+- (-) is connected to left (-) column (y=0)
+
+(0, 1) LED
+- (+) is connected to left (+) column (x=0)
+- (-) is connected to right (-) column (y=1)
+
+(1, 1) LED
+- (+) is connected to right (+) column (x=1)
+- (-) is connected to right (-) column (y=1)

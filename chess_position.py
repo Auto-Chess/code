@@ -34,3 +34,6 @@ class ChessPosition:
 
     def __str__(self):
         return self.col + str(self.row)
+
+    def col_to_int(self):
+        return ord(self.col) - 96 - 1
