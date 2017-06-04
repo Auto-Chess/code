@@ -54,12 +54,13 @@ class LedInterface():
         i = 0
         for pin in pin_list:
             if i != exception_i:
-                GPIO.output(pin, value)
+                if self.operation_mode == "hardware":
+                    GPIO.output(pin, value)
             i += 1
 
     def turn_on_led(self, position):
         # Check if x and y in bounds
-        x = position.call_to_int()
+        x = position.col_to_int()
         y = position.row-1
 
         if x > len(self.highs) - 1:
@@ -73,7 +74,7 @@ class LedInterface():
 
     def turn_off_led(self, position):
         # Check if in on list
-        x = position.call_to_int()
+        x = position.col_to_int()
         y = position.row - 1
 
         if [x, y] in self.on:
@@ -83,7 +84,7 @@ class LedInterface():
             raise IndexError("Not in ons")
 
     def start_blinking_led(self, position, interval):
-        x = position.call_to_int()
+        x = position.col_to_int()
         y = position.row - 1
 
         with self.blinking_lock:
@@ -126,11 +127,13 @@ class LedInterface():
                     high_pin = self.highs[x]
                     low_pin=self.lows[y]
 
-                    GPIO.output(high_pin,1)
-                    self.turn_all_to_except(0, self.highs, x)
+                    if self.operation_mode == "hardware":
+                        GPIO.output(high_pin,1)
+                        self.turn_all_to_except(0, self.highs, x)
 
-                    GPIO.output(low_pin,0)
-                    self.turn_all_to_except(1, self.lows, y)
+                    if self.operation_mode == "hardware":
+                        GPIO.output(low_pin,0)
+                        self.turn_all_to_except(1, self.lows, y)
 
                     divisor = len(self.on)
                     if divisor == 0:
