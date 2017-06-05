@@ -18,14 +18,15 @@ Return:
 """
 class GameLoopEntity():
 
-    def __init__(self):
+    def __init__(self, operation_mode):
         self.welcomed = False
         self.pressed = False
+        self.operation_mode = operation_mode
 
-        self.lcd_interface = LCDInterface("hardware")
+        self.lcd_interface = LCDInterface(self.operation_mode)
         self.chess_library = ChessLibrary()
         self.chess_library.set_difficulty(0)
-        self.led_interface = LedInterface([9, 11, 5, 6, 13, 19, 26, 21], [2, 3, 4, 17, 27, 22, 10, 20], "hardware")
+        self.led_interface = LedInterface([9, 11, 5, 6, 13, 19, 26, 21], [2, 3, 4, 17, 27, 22, 10, 20], self.operation_mode)
         self.led_interface.setup()
         self.led_interface.start_run_in_thread()
 
