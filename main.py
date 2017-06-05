@@ -11,4 +11,10 @@ This tells your computer to run the 'main.py' file with Python on your computer.
 
 # Game loop
 game_loop = GameLoopEntity()
-game_loop.run()
+
+try:
+    game_loop.run()
+except KeyboardInterrupt as e:
+    game_loop.led_interface.running = False
+    game_loop.led_interface.cleanup()
+    game_loop.led_interface.thread.join()

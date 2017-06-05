@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
-from flask_redis import FlaskRedis
 from flask_socketio import SocketIO, join_room, send, emit
 
 from multiprocessing import Process
@@ -14,6 +13,8 @@ def random_string():
 
 # Flask app
 app = Flask(__name__)
+app_host = "127.0.0.1"
+app_port = 5000
 
 ENV_DEBUG = "debug"
 ENV_PROD = "production"
@@ -23,16 +24,17 @@ ENVIRONMENT = os.getenv('ENVIRONMENT', ENV_DEBUG)
 
 if ENVIRONMENT == ENV_TEST:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///autochess.db'
-else:
+elif ENVIRONMENT == ENV_DEBUG:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/auto-chess'
+elif ENVIRONMENT == ENV_PROD:
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://auto-chess:{}@localhost/auto-chess".format(os.getenv("DB_PASSWORD", "NO_PASSWORD"))
+    app_host = "0.0.0.0"
+    app_port = 80
 
-
-#app.config['REDIS_URL'] = 'redis://:@localhost:6379/0'
 app.config['SECRET_KEY'] = random_string()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-#redis_store = FlaskRedis(app)
 socketio = SocketIO(app)
 
 # Models
@@ -63,7 +65,7 @@ class ChessBoard(db.Model):
 
         self.game_running = True
         self.turn = ChessBoard.TURN_USER
-        self.turn_number = 1
+        self.turn_number = 0
 
     def __str__(self):
         return "<ChessBoard id={}, secret={}, last_used={}, short_code={}, game_running={}, turn={}, turn_number={}, chess_moves.len={}>"\
@@ -449,7 +451,7 @@ def _run_webserver():
     ChessBoard.clean_old()
 
     try:
-        socketio.run(app)
+        socketio.run(app, host=app_host, port=app_port)
     except KeyboardInterrupt as e:
         print("Keyboard interrupted server")
 
