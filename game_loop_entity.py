@@ -251,8 +251,7 @@ class GameLoopEntity():
                 print("Game Loop Entity: Failed to signal game over: {}".format(errs))
 
     def close(self):
-        self.led_interface.cleanup()
-
         self.led_interface.running = False
-        self.led_interface.cleanup()
         self.led_interface.thread.join()
+
+        self.led_interface.cleanup()
