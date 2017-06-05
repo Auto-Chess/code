@@ -249,6 +249,10 @@ def socketio_client_lib():
 def socketio_client_lib_map():
     return app.send_static_file("js/socket.io.js.map")
 
+@app.route("/img/chess_piece.svg")
+def img_chess_piece():
+    return app.send_static_file("img/chess_piece.svg")
+
 # -- -- Register
 @app.route("/chess_board/register")
 def api_register():
@@ -369,7 +373,7 @@ def api_chess_board_moves_list(chess_board_id, chess_move_player):
         }), 400)
 
     # Get Moves
-    moves = ChessMove.query.filter(ChessMove.chess_board_id == chess_board_id and ChessMove.player == chess_move_player).all()
+    moves = ChessMove.query.filter(ChessMove.chess_board_id == chess_board_id).filter(ChessMove.player == chess_move_player).all()
 
     # Make moves a response
     resp = []

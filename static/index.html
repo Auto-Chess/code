@@ -2,12 +2,17 @@
 <html>
 <head>
     <title>Auto Chess</title>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
     <script src="/js/socket.io.js"></script>
 
     <style>
         html, body {
             font-size: 10px;
+        }
+
+        body {
+            text-align: center;
         }
 
         /* General */
@@ -19,8 +24,6 @@
 
         .section {
             width: 49%;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
             display: inline-block;
         }
 
@@ -29,6 +32,16 @@
             font-size: 3rem;
             text-align: center;
             text-decoration: underline;
+        }
+
+        button {
+            padding: 1rem;
+            display: inline-block;
+            border: 1px solid black;
+            cursor: pointer;
+            background-color: white;
+            text-align: center;
+            user-select: none;
         }
 
         /* Game Connect */
@@ -68,13 +81,6 @@
         #connect-button {
             width: 12rem;
             margin-top: 1rem;
-            padding: 1rem;
-            display: inline-block;
-            border: 1px solid black;
-            cursor: pointer;
-            background-color: white;
-            text-align: center;
-            user-select: none;
         }
 
         #connect-button:active {
@@ -89,32 +95,78 @@
             color: #D50000;
         }
 
-        /* Timer */
-        .timer {
-            width: 100%;
-            margin-top: 20px;
-            font-size: 6rem;
-            text-align: center;
+        /* Disconnect Button */
+        #disconnect-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+        }
+
+        /* Actual Short Code */
+        #actual-short-code {
+            margin-top: 1rem;
+            text-decoration: underline;
+        }
+
+        /* Turn Indicator */
+        .turn-indicator {
+            width: 20rem;
+            transition: opacity 1s;
         }
 
         /* Moves List */
+        .moves-container {
+            max-width: 40rem;
+        }
+
         .moves-table {
             width: 100%;
+        }
+
+        .moves-table-header {
             margin-top: 2rem;
         }
 
+        .turn-num-header {
+            display: block;
+        }
+
+        .turn-num-header-small {
+            display: none;
+        }
+
+        @media (max-width: 835px) {
+            .turn-num-header {
+                display: none;
+            }
+
+            .turn-num-header-small {
+                display: block;
+            }
+        }
+
         .moves-table th {
-            width: 50%;
-            font-size: 3rem;
+            font-size: 2rem;
             text-align: center;
         }
 
+        .moves-table th {
+            width: 100%;
+        }
+
         .moves-table th:nth-child(1) {
-            width: 20%;
+            min-width: 10rem;
         }
 
         .moves-table td {
+            font-size: 2rem;
+            text-align: center;
             border: 1px solid black;
+        }
+
+        /* Footer */
+        #footer {
+            margin-top: 10rem;
         }
     </style>
 </head>
@@ -135,36 +187,44 @@
 </div>
 
 <div id="game-info" style="display: none">
-    <div id="timers">
-        <div class="section timer-container">
-            <div class="section-title">Player</div>
-            <div class="timer" id="player-timer">5:00</div>
-        </div>
-        <div class="section timer-container">
-            <div class="section-title">Opponent</div>
-            <div class="timer" id="opponent-timer">5:00</div>
-        </div>
-    </div>
+    <div class="title" id="actual-short-code">Short Code: </div>
+    <button id="disconnect-button" onclick="location.reload();">Disconnect</button>
 
     <div id="moves">
         <div class="section moves-container">
+            <img class="turn-indicator" id="player-indicator" src="/img/chess_piece.svg">
+
             <div class="section-title">Player</div>
-            <table class="moves-table" id="player-moves">
+            <table class="moves-table moves-table-header">
                 <tr>
-                    <th>#</th>
+                    <th class="turn-num-header">Turn #</th>
+                    <th class="turn-num-header-small">#</th>
                     <th>Move</th>
                 </tr>
+            </table>
+            <table class="moves-table" id="player-moves">
+
             </table>
         </div>
         <div class="section moves-container">
+            <img class="turn-indicator" id="opponent-indicator" src="/img/chess_piece.svg">
+
             <div class="section-title">Opponent</div>
-            <table class="moves-table" id="opponent-moves">
+            <table class="moves-table moves-table-header">
                 <tr>
-                    <th>#</th>
+                    <th class="turn-num-header">Turn #</th>
+                    <th class="turn-num-header-small">#</th>
                     <th>Move</th>
                 </tr>
             </table>
+            <table class="moves-table" id="opponent-moves">
+
+            </table>
         </div>
+    </div>
+
+    <div id="footer">
+        Chess piece logo by en:User:Cburnett [GFDL (http://www.gnu.org/copyleft/fdl.html), CC-BY-SA-3.0 (http://creativecommons.org/licenses/by-sa/3.0/), BSD (http://opensource.org/licenses/bsd-license.php) or GPL (http://www.gnu.org/licenses/gpl.html)], via Wikimedia Commons
     </div>
 </div>
 
@@ -173,6 +233,11 @@
     var gameConnectEl = document.getElementById("game-connect");
     var shortCodeInputEl = document.getElementById("short-code-input");
     var gameConnectStatusEl = document.getElementById("connect-status");
+
+    var actualShortCodeEl = document.getElementById("actual-short-code");
+
+    var playerTurnIndicator = document.getElementById("player-indicator");
+    var opponentTurnIndicator = document.getElementById("opponent-indicator");
 
     var gameInfoEl = document.getElementById("game-info");
     var playerMovesEl = document.getElementById("player-moves");
@@ -186,13 +251,13 @@
     function addChessMoveToUI(move) {
         var moveHtml = "<tr>";
         moveHtml += "<td>" + move.turn_number + "</td>";
-        moveHtml += "<td>" + move.initial_col + move.initial_row + move.final_col  + move.final_row + "</td>";
+        moveHtml += "<td>" + move.initial_col + move.initial_row + " => " + move.final_col  + move.final_row + "</td>";
         moveHtml += "</tr>";
 
         if (move.player === "user") {
-            playerMovesEl.innerHTML += moveHtml;
+            playerMovesEl.innerHTML = moveHtml + playerMovesEl.innerHTML;
         } else {
-            opponentMovesEl.innerHTML += moveHtml;
+            opponentMovesEl.innerHTML = moveHtml + opponentMovesEl.innerHTML;
         }
     }
 
@@ -214,30 +279,28 @@
         }
     }
 
-    // Create timers
-    var fiveMinutes = 1000 * 60 * 5;
-    var playerTimer = new Timer("player-timer", fiveMinutes);
-    var opponentTimer = new Timer("opponent-timer", fiveMinutes);
-
-    // Timer helpers
     /**
      * Start and pause the player and opponent timers based on the provided Chess Board
      * @param chessBoard {ChessBoard} Chess Board to set timers based on
      */
-    function setTimersFromChessBoard(chessBoard) {
+    function setTurnIndicatorFromChessBoard(chessBoard) {
         if (chessBoard.game_running) {
              // Set timers based on Chess Board turn
             if (chessBoard.turn === "user") {
-                if (!playerTimer.running()) playerTimer.start();
-                if (opponentTimer.running()) opponentTimer.pause();
+                playerTurnIndicator.style.opacity = "100";
+                opponentTurnIndicator.style.opacity = "0";
             } else if (chessBoard.turn === "opponent") {
-                if (!opponentTimer.running()) opponentTimer.start();
-                if (playerTimer.running()) playerTimer.pause();
+                opponentTurnIndicator.style.opacity = "100";
+                playerTurnIndicator.style.opacity = "0";
             }
         } else {
-            if (playerTimer.running()) playerTimer.stop();
-            if (opponentTimer.running()) opponentTimer.stop();
+            playerTurnIndicator.style.opacity = "0";
+            opponentTurnIndicator.style.opacity = "0";
         }
+    }
+
+    function setActualShortCode(shortCode) {
+        actualShortCodeEl.innerText = "Short Code: " + shortCode;
     }
 
     // Game
@@ -258,85 +321,6 @@
         }
 
         return false;
-    }
-
-    /**
-     * Make a number 2 digits
-     * @param num Number to make 2 digits
-     * @returns 2 digit form of number
-     */
-    function makeTwoDigits(num) {
-        return ("0" + num).slice(-2);
-    }
-
-    /**
-     * Timer class
-     * @param id Id of HTML element to show timer duration in
-     * @param duration Starting duration in MS
-     * @constructor
-     */
-    function Timer(id, duration) {
-        var self = this;
-        self.id = id;
-        self.startTime = Date.now();
-        self.duration = duration;
-        self.el = document.getElementById(self.id);
-        self.interval = undefined;
-
-        if (self.el === null) {
-            console.error("Could not find element with id: \"" + self.id + "\"");
-        }
-
-        /**
-         * Function run every timer "tick"
-         */
-        self.tick = function() {
-            // Calculate
-            var dt = Date.now() - self.startTime;
-            var ms = self.duration - dt;
-
-            var date = new Date(0, 0, 0, 0, 0, 0, ms);
-
-            // Display
-            if (ms <= 0) {
-                self.el.innerText = "0:00";
-                clearInterval(self.interval);
-            } else {
-                self.el.innerText = date.getMinutes() + ":" + makeTwoDigits(date.getSeconds());
-            }
-        };
-
-        /**
-         * Pauses the Timer, errors if Timer is already paused
-         */
-        self.pause = function() {
-            if (self.interval === undefined) {
-                console.error("Can not pause timer, already paused");
-                return;
-            }
-
-            clearInterval(self.interval);
-        };
-
-        /**
-         * Start the Timer, errors if Timer is already started
-         */
-        self.start = function() {
-            if (self.interval !== undefined) {
-                console.error("Can not start timer, already started");
-                return;
-            }
-
-            self.interval = setInterval(self.tick, 1000);
-        };
-
-        /**
-         * Determines if Timer is running
-         * @returns {boolean} True if running, false if not
-         */
-        self.running = function() {
-            return self.interval !== undefined;
-        };
     }
 
     // Connect button
@@ -389,6 +373,8 @@
             gameConnectStatusEl.innerText = "Connected";
             gameConnectEl.style.display = "none";
             gameInfoEl.style.display = "block";
+            game.fetchChessMoves("user");
+            game.fetchChessMoves("opponent");
 
         };
 
@@ -441,7 +427,8 @@
 
             // Set UI
             if (self.chessBoard !== undefined) {
-                setTimersFromChessBoard(self.chessBoard);
+                setTurnIndicatorFromChessBoard(self.chessBoard);
+                setActualShortCode(self.chessBoard.short_code);
             }
 
             // Check we have all the Chess Moves
@@ -455,11 +442,9 @@
          */
         self.checkInSync = function() {
             if (self.chessBoard === undefined) {
-                console.log("checkInSync: undefined");
                 return;
             }
 
-            console.log("checkInSync: userMoves: " + self.userMoves.length + ", opponentMoves: " + self.opponentMoves.length + ", turn number: " + self.chessBoard.turn_number);
             if ((self.userMoves.length + self.opponentMoves.length) !== self.chessBoard.turn_number) {
                 self.fetchChessMoves("user");
                 self.fetchChessMoves("opponent");
@@ -543,6 +528,9 @@
             } else {
                 self.opponentMoves = moves;
             }
+
+            // UI
+            self.remapMoves(player);
         };
 
         /**
@@ -609,6 +597,33 @@
 
             // Add move to ui
             addChessMoveToUI(move);
+        };
+
+        /**
+         * Remaps a player's moves to the UI
+         * @param player {string} Player to reset moves ui for
+         * @throws {Error} If player is not "user" or "opponent"
+         */
+        self.remapMoves = function(player) {
+            // Check move player
+            if (player !== "user" && player !== "opponent") {
+                throw new Error("Move player must be either \"user\" or \"opponent\"");
+            }
+
+            // Reset UI
+            resetChessMovesUI(player);
+
+            // Remap
+            var moves = [];
+            if (player === "user") {
+                moves = self.userMoves;
+            } else {
+                moves = self.opponentMoves;
+            }
+
+            for (var i = 0; i < moves.length; i++) {
+                addChessMoveToUI(moves[i]);
+            }
         };
 
         /**

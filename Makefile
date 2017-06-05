@@ -1,8 +1,7 @@
 .PHONY: sync ssh \
-		run run-server test \
+		run run-h run-server test \
 		setup-file setup scan status restart-ip \
-		psql-create psql-destroy psql-start psql-stop \
-		redis-create redis-destroy redis-start redis-stop
+		psql-create psql-destroy psql-start psql-stop
 
 # Sync
 sync:
@@ -14,8 +13,11 @@ ssh:
 
 # Run
 # -- -- Run
-run:
+run-h:
 	OP_MODE=hardware python3 ./main.py
+
+run:
+	python ./main.py
 
 run-server:
 	python ./webserver.py
@@ -70,17 +72,3 @@ psql-start:
 	docker start auto-chess-postgres
 psql-stop:
 	docker stop auto-chess-postgres
-
-# Redis dev server
-redis-create:
-	docker run \
-		--name auto-chess-redis \
-		-p 6379:6379 \
-		-d \
-		redis
-redis-destroy:
-	docker rm auto-chess-redis
-redis-start:
-	docker start auto-chess-redis
-redis-stop:
-	docker stop auto-chess-redis

@@ -3,7 +3,6 @@ python-chess
 Flask
 flask-sqlalchemy
 requests
-pynput
 psycopg2
 flask-socketio
 eventlet
