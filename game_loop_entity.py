@@ -4,6 +4,7 @@ from chess_move import ChessMove
 from lcd_interface import LCDInterface
 from chess_library import ChessLibrary
 import time
+from getch import getch
 
 from webserver_interface import WebServerInterface
 
@@ -98,8 +99,12 @@ class GameLoopEntity():
         while True:
             while True:
                 self.lcd_interface.display(prompt, "position")
-                user_input = input()
-
+                user_input = ""
+                latest = None
+                while latest != "\n":
+                    latest = getch()
+                    user_input += latest
+                
                 if user_input == "pause":
                     self.pause()
                 else:
