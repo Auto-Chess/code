@@ -178,7 +178,6 @@ class GameLoopEntity():
             while True:
                 # Prompt user for input
                 user_move = self.prompt_user_for_input()
-                self.led_interface.stop_all()
 
                 try:
                     # Give to chess lib
@@ -194,6 +193,7 @@ class GameLoopEntity():
             self.show_opponent_move(opp_move.init_pos, opp_move.final_pos)
             self.lcd_interface.display("Move opp.", "piece")
             input()
+            self.led_interface.stop_all()
 
         errs = self.webserver_interface.signal_game_over()
         if errs is not None:

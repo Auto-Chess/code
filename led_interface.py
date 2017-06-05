@@ -24,6 +24,8 @@ class LedInterface():
         self.blink_intervals = {}
         self.blinking_lock = threading.Lock()
 
+        self.running = True
+
     def all_off(self):
         self.on = []
 
@@ -40,7 +42,7 @@ class LedInterface():
     def reset(self):
         # Set all to low
         for pin in self.lows:
-            GPIO.output(pin, 0)
+            GPIO.output(pin, 1)
 
         for pin in self.highs:
             GPIO.output(pin, 0)
@@ -48,7 +50,9 @@ class LedInterface():
 
     def cleanup(self):
         self.reset()
-        GPIO.cleanup()
+
+        if self.operation_mode == "hardware":
+            GPIO.cleanup()
 
     def turn_all_to_except(self, value, pin_list, exception_i):
         i = 0
@@ -94,14 +98,17 @@ class LedInterface():
             self.blink_intervals[k] = interval
 
     def stop_all(self):
+        with self.blinking_lock:
+            self.blinking = []
+            self.last_blinks = {}
+            self.blink_intervals = {}
+
         with self.on_lock:
             self.on = []
 
-        with self.blinking_lock:
-            self.blinking = []
-
     def run(self):
-        while True:
+        self.running = True
+        while self.running:
             with self.blinking_lock:
                 for pos in self.blinking:
                     x = pos[0]
@@ -110,29 +117,33 @@ class LedInterface():
                     dt = time.time()-self.last_blinks[k]
                     i = self.blink_intervals[k]
 
+
                     if dt >= 0 and dt < i:
                         with self.on_lock:
-                            self.on.append([x,y])
+                            if [x, y] not in self.on:
+                                self.on.append([x, y])
                     elif dt >= i and dt < i*2:
                         with self.on_lock:
-                            self.on.remove([x,y])
-                    else:
+                            if [x, y] in self.on:
+                                self.on.remove([x, y])
+                    elif dt >= i*2:
                         self.last_blinks[k] = time.time()
 
+            self.reset()
             with self.on_lock:
                 for pos in self.on:
                     x = pos[0]
                     y = pos[1]
 
                     high_pin = self.highs[x]
-                    low_pin=self.lows[y]
+                    low_pin = self.lows[y]
 
                     if self.operation_mode == "hardware":
-                        GPIO.output(high_pin,1)
+                        GPIO.output(high_pin, 1)
                         self.turn_all_to_except(0, self.highs, x)
 
                     if self.operation_mode == "hardware":
-                        GPIO.output(low_pin,0)
+                        GPIO.output(low_pin, 0)
                         self.turn_all_to_except(1, self.lows, y)
 
                     divisor = len(self.on)
@@ -142,5 +153,5 @@ class LedInterface():
                     time.sleep(0.01 / divisor)
 
     def start_run_in_thread(self):
-        thread = threading.Thread(target= self.run)
-        thread.start()
+        self.thread = threading.Thread(target= self.run)
+        self.thread.start()
