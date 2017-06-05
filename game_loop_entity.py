@@ -30,7 +30,7 @@ class GameLoopEntity():
         self.led_interface.setup()
         self.led_interface.start_run_in_thread()
 
-        self.webserver_interface = WebServerInterface()
+        self.webserver_interface = WebServerInterface("http://autochess.noahhuppert.com")
 
 
     """Gets user input and displays it on lcd as they type
