@@ -10,8 +10,9 @@ Run by typing:
 into your terminal in the directory of this file (main.py).
 This tells your computer to run the 'main.py' file with Python on your computer.
 """
-operation_mode = os.getenv("OP_MODE", "software")
+
 # Game loop
+operation_mode = os.getenv("OP_MODE", "software")
 game_loop = GameLoopEntity(operation_mode)
 
 try:

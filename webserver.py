@@ -249,6 +249,10 @@ def socketio_client_lib():
 def socketio_client_lib_map():
     return app.send_static_file("js/socket.io.js.map")
 
+@app.route("/img/chess_piece.svg")
+def img_chess_piece():
+    return app.send_static_file("img/chess_piece.svg")
+
 # -- -- Register
 @app.route("/chess_board/register")
 def api_register():

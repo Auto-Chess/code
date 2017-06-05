@@ -1,4 +1,3 @@
-import serial
 
 class LCDInterface():
 
@@ -6,6 +5,7 @@ class LCDInterface():
     def __init__(self, operation_mode="software"):
         self.operation_mode = operation_mode
         if (self.operation_mode == "hardware"):
+            import serial
             self.lcdCom = serial.Serial(
                     port="/dev/serial0",
                     baudrate=9600,

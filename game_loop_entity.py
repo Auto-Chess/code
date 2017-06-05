@@ -30,8 +30,39 @@ class GameLoopEntity():
         self.led_interface.setup()
         self.led_interface.start_run_in_thread()
 
-        self.webserver_interface = WebServerInterface("http://autochess.noahhuppert.com")
+        self.webserver_interface = WebServerInterface()
 
+
+    """Gets user input and displays it on lcd as they type
+    Args:
+        - first_line (str): First line of text to display on lcd
+        - second_line (str): Second line of text to display before user input
+    
+    Returns:
+        - str: User inputted string
+    """
+    def lcd_input(self, first_line, second_line):
+        user_input = ""
+        latest = None
+        while latest != repr("\r"):
+            latest = repr(getch())
+            if latest == repr("\r"):# Return
+                break
+            elif latest == repr("\x7f"):# Backspace
+                user_input = user_input[:-1]
+            elif latest == repr("\x03"):#Ctrl+c
+                self.close()
+            else:
+                user_input += str(latest[1:-1])
+
+            to_display = user_input
+            while True:
+                try:
+                    self.lcd_interface.display(first_line, "{}: {}".format(second_line, str(to_display)))
+                    break
+                except ValueError:
+                    to_display = to_display[1:]
+        return user_input
 
     """ Listens for the keyboard to begin typing.
         Saves listener for later usage.
@@ -101,25 +132,7 @@ class GameLoopEntity():
         while True:
             while True:
                 self.lcd_interface.display(prompt, "position")
-                user_input = ""
-                latest = None
-                while latest != repr("\r"):
-                    latest = repr(getch())
-                    print(latest)
-                    if latest == repr("\x7f"):# Backspace
-                        user_input = user_input[:-1]
-                    elif latest == repr("\x03"):#Ctrl+c
-                        self.close()
-                    else:
-                        user_input += str(latest[1:-1])
-
-                    to_display = user_input
-                    while True:
-                        try:
-                            self.lcd_interface.display(prompt, "position {}".format(str(to_display)))
-                            break
-                        except ValueError:
-                            to_display = to_display[1:]
+                user_input = self.lcd_input(prompt, "position")
 
                 if user_input == "pause":
                     self.pause()
@@ -227,3 +240,4 @@ class GameLoopEntity():
         self.led_interface.running = False
         self.led_interface.cleanup()
         self.led_interface.thread.join()
+        exit()

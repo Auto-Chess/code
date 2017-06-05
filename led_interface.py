@@ -1,17 +1,21 @@
 import collections
 import time
-import RPi.GPIO as GPIO
 import threading
 from chess_position import ChessPosition
 
+GPIO = None
+
 class LedInterface():
     def __init__(self, lows, highs, operation_mode="software"):
+        global GPIO
         self.operation_mode = operation_mode
 
         if self.operation_mode == "hardware":
-            import RPi.GPIO as GPIO
+            import RPi.GPIO as _GPIO
+            GPIO = _GPIO
         else:
-            from fake_gpio import GPIO
+            from fake_gpio import GPIO as _GPIO
+            GPIO = _GPIO
 
         self.lows = lows
         self.highs = highs
