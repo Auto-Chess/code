@@ -144,7 +144,7 @@ class GameLoopEntity():
 
                 position = ChessPosition(col, row)
                 return position
-            except ValueError:
+            except ValueError or IndexError:
                 self.lcd_interface.display("Bad move", "Try again")
                 input()
 

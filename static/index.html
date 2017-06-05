@@ -11,6 +11,10 @@
             font-size: 10px;
         }
 
+        body {
+            text-align: center;
+        }
+
         /* General */
         .title {
             width: 100%;
@@ -105,28 +109,53 @@
         }
 
         /* Turn Indicator */
-        #turn-indicators {
-            text-align: center;
-        }
-        #turn-indicators img {
+        .turn-indicator {
             width: 20rem;
             transition: opacity 1s;
         }
 
         /* Moves List */
+        .moves-container {
+            max-width: 40rem;
+        }
+
         .moves-table {
             width: 100%;
+        }
+
+        .moves-table-header {
             margin-top: 2rem;
         }
 
+        .turn-num-header {
+            display: block;
+        }
+
+        .turn-num-header-small {
+            display: none;
+        }
+
+        @media (max-width: 835px) {
+            .turn-num-header {
+                display: none;
+            }
+
+            .turn-num-header-small {
+                display: block;
+            }
+        }
+
         .moves-table th {
-            width: 50%;
-            font-size: 3rem;
+            font-size: 2rem;
             text-align: center;
         }
 
+        .moves-table th {
+            width: 100%;
+        }
+
         .moves-table th:nth-child(1) {
-            width: 20%;
+            min-width: 10rem;
         }
 
         .moves-table td {
@@ -160,32 +189,36 @@
 <div id="game-info" style="display: none">
     <div class="title" id="actual-short-code">Short Code: </div>
     <button id="disconnect-button" onclick="location.reload();">Disconnect</button>
-    <div id="turn-indicators">
-        <div class="section">
-            <img id="player-indicator" src="/img/chess_piece.svg">
-        </div>
-        <div class="section">
-            <img id="opponent-indicator" src="/img/chess_piece.svg">
-        </div>
-    </div>
 
     <div id="moves">
         <div class="section moves-container">
+            <img class="turn-indicator" id="player-indicator" src="/img/chess_piece.svg">
+
             <div class="section-title">Player</div>
-            <table class="moves-table" id="player-moves">
+            <table class="moves-table moves-table-header">
                 <tr>
-                    <th>#</th>
+                    <th class="turn-num-header">Turn #</th>
+                    <th class="turn-num-header-small">#</th>
                     <th>Move</th>
                 </tr>
             </table>
+            <table class="moves-table" id="player-moves">
+
+            </table>
         </div>
         <div class="section moves-container">
+            <img class="turn-indicator" id="opponent-indicator" src="/img/chess_piece.svg">
+
             <div class="section-title">Opponent</div>
-            <table class="moves-table" id="opponent-moves">
+            <table class="moves-table moves-table-header">
                 <tr>
-                    <th>Turn #</th>
+                    <th class="turn-num-header">Turn #</th>
+                    <th class="turn-num-header-small">#</th>
                     <th>Move</th>
                 </tr>
+            </table>
+            <table class="moves-table" id="opponent-moves">
+
             </table>
         </div>
     </div>
@@ -222,13 +255,12 @@
         moveHtml += "</tr>";
 
         if (move.player === "user") {
-            playerMovesEl.innerHTML += moveHtml;
+            playerMovesEl.innerHTML = moveHtml + playerMovesEl.innerHTML;
         } else {
-            opponentMovesEl.innerHTML += moveHtml;
+            opponentMovesEl.innerHTML = moveHtml + opponentMovesEl.innerHTML;
         }
     }
 
-    var chessMovesUIHeader = "<tr><th>Turn #</th><th>Move</th></tr>";
     /**
      * Reset Chess Moves UI for specified player
      * @param player {string} Player to reset Chess Moves for
@@ -241,9 +273,9 @@
         }
 
         if (player === "user") {
-            playerMovesEl.innerHTML = chessMovesUIHeader;
+            playerMovesEl.innerHTML = "";
         } else {
-            opponentMovesEl.innerHTML = chessMovesUIHeader;
+            opponentMovesEl.innerHTML = "";
         }
     }
 
