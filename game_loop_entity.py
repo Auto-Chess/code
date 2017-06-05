@@ -72,17 +72,21 @@ class GameLoopEntity():
 
     def pause(self):
         self.lcd_interface.display("Paused", "d, n, or q")
-        user_input = input()
+        user_input = self.lcd_input("Paused", "d, n, or q")
         if user_input == 'd':
-            self.lcd_interface.display("Enter Difficulty 0-20", "")
-            dif = input()
+            self.lcd_interface.display("Enter Diff. 0-20", "")
+            dif = self.lcd_input("Enter Diff. 0-20", "New diff.")
             dif = dif[-1:]
             self.chess_library.set_difficulty(int(dif))
             self.chess_library.get_difficulty()
         elif user_input == 'n':
-            self.lcd_interface.display("New game", "")
-            self.chess_library.start_game()
-            self.webserver_interface.signal_game_over()
+            self.lcd_interface.display("New game", "Relaunch pls")
+            res = self.webserver_interface.signal_game_over()
+            if res is not None:
+                print("Error signalling game over: {}".format(res))
+            input()
+            self.close()
+            exit()
 
         elif user_input == 'q':
             self.lcd_interface.display("Quit", "")
