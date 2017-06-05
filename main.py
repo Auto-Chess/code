@@ -13,9 +13,12 @@ This tells your computer to run the 'main.py' file with Python on your computer.
 
 # Game loop
 operation_mode = os.getenv("OP_MODE", "software")
-game_loop = GameLoopEntity(operation_mode)
+while True:
+    game_loop = GameLoopEntity(operation_mode)
 
-try:
-    game_loop.run()
-except KeyboardInterrupt as e:
-    game_loop.close()
+    try:
+        game_loop.run()
+        if not game_loop.new_game_on_exit:
+            break
+    except KeyboardInterrupt as e:
+        game_loop.close()

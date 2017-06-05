@@ -21,6 +21,7 @@ class GameLoopEntity():
     def __init__(self, operation_mode):
         self.welcomed = False
         self.pressed = False
+        self.new_game_on_exit = False
         self.operation_mode = operation_mode
 
         self.lcd_interface = LCDInterface(self.operation_mode)
@@ -52,6 +53,7 @@ class GameLoopEntity():
                 user_input = user_input[:-1]
             elif latest == repr("\x03"):#Ctrl+c
                 self.close()
+                exit()
             else:
                 user_input += str(latest[1:-1])
 
@@ -80,13 +82,13 @@ class GameLoopEntity():
             self.chess_library.set_difficulty(int(dif))
             self.chess_library.get_difficulty()
         elif user_input == 'n':
-            self.lcd_interface.display("New game", "Relaunch pls")
+            self.lcd_interface.display("New game", "")
             res = self.webserver_interface.signal_game_over()
             if res is not None:
                 print("Error signalling game over: {}".format(res))
+            self.new_game_on_exit = True
             input()
             self.close()
-            exit()
 
         elif user_input == 'q':
             self.lcd_interface.display("Quit", "")
@@ -116,6 +118,9 @@ class GameLoopEntity():
         initial_pos = self.gather_user_input("Initial")
         final_pos = self.gather_user_input("Final")
 
+        if self.new_game_on_exit:
+            return
+
         move = ChessMove(initial_pos, final_pos)
 
         return move
@@ -133,13 +138,15 @@ class GameLoopEntity():
 
     """
     def gather_user_input(self, prompt):
-        while True:
+        while not self.new_game_on_exit:
             while True:
                 self.lcd_interface.display(prompt, "position")
                 user_input = self.lcd_input(prompt, "position")
 
                 if user_input == "pause":
                     self.pause()
+                    if self.new_game_on_exit:
+                        return
                 else:
                     break
             try:
@@ -148,11 +155,12 @@ class GameLoopEntity():
 
                 position = ChessPosition(col, row)
                 return position
-            except ValueError or IndexError:
+            except ValueError:
                 self.lcd_interface.display("Bad move", "Try again")
                 input()
-
-
+            except IndexError:
+                self.lcd_interface.display("Bad move", "Try again")
+                input()
 
     """ Gives the inputted initial and final position to the chess engine.
         Creates a chessMove from the positions.
@@ -213,10 +221,13 @@ class GameLoopEntity():
             input()
 
         i = 1
-        while not self.chess_library.is_game_over():
+        while not self.chess_library.is_game_over() and not self.new_game_on_exit:
             while True:
                 # Prompt user for input
                 user_move = self.prompt_user_for_input()
+
+                if self.new_game_on_exit:
+                    return
 
                 try:
                     # Give to chess lib
@@ -234,9 +245,10 @@ class GameLoopEntity():
             input()
             self.led_interface.stop_all()
 
-        errs = self.webserver_interface.signal_game_over()
-        if errs is not None:
-            print("Game Loop Entity: Failed to signal game over: {}".format(errs))
+        if not self.new_game_on_exit:
+            errs = self.webserver_interface.signal_game_over()
+            if errs is not None:
+                print("Game Loop Entity: Failed to signal game over: {}".format(errs))
 
     def close(self):
         self.led_interface.cleanup()
@@ -244,4 +256,3 @@ class GameLoopEntity():
         self.led_interface.running = False
         self.led_interface.cleanup()
         self.led_interface.thread.join()
-        exit()
