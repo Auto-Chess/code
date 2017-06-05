@@ -1,19 +1,21 @@
-.PHONY: run run-server test \
+.PHONY: sync ssh \
+		run run-server test \
 		setup-file setup scan status restart-ip \
 		psql-create psql-destroy psql-start psql-stop \
 		redis-create redis-destroy redis-start redis-stop
 
 # Sync
 sync:
-	scp * pi@10.0.0.102:/home/pi/app
+	scp {*.py,requirements.txt,Makefile} pi@10.0.0.102:/home/pi/app
 
 # SSH
+ssh:
 	ssh pi@10.0.0.102
 
 # Run
 # -- -- Run
 run:
-	python ./main.py
+	OP_MODE=hardware python3 ./main.py
 
 run-server:
 	python ./webserver.py

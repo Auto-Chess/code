@@ -59,6 +59,7 @@ class GameLoopEntity():
             if res is not None:
                 print("Error signalling game over: {}".format(res))
             else:
+                self.close()
                 exit()
 
             self.welcomed = False
@@ -102,10 +103,24 @@ class GameLoopEntity():
                 self.lcd_interface.display(prompt, "position")
                 user_input = ""
                 latest = None
-                while latest != "\n":
-                    latest = getch()
-                    user_input += latest
-                
+                while latest != repr("\r"):
+                    latest = repr(getch())
+                    print(latest)
+                    if latest == repr("\x7f"):# Backspace
+                        user_input = user_input[:-1]
+                    elif latest == repr("\x03"):#Ctrl+c
+                        self.close()
+                    else:
+                        user_input += str(latest[1:-1])
+
+                    to_display = user_input
+                    while True:
+                        try:
+                            self.lcd_interface.display(prompt, "position {}".format(str(to_display)))
+                            break
+                        except ValueError:
+                            to_display = to_display[1:]
+
                 if user_input == "pause":
                     self.pause()
                 else:
@@ -117,7 +132,8 @@ class GameLoopEntity():
                 position = ChessPosition(col, row)
                 return position
             except ValueError:
-                self.lcd_interface.display("Incorrect coordinate, try again.", "")
+                self.lcd_interface.display("Bad move", "Try again")
+                input()
 
 
 
@@ -204,3 +220,10 @@ class GameLoopEntity():
         errs = self.webserver_interface.signal_game_over()
         if errs is not None:
             print("Game Loop Entity: Failed to signal game over: {}".format(errs))
+
+    def close(self):
+        self.led_interface.cleanup()
+
+        self.led_interface.running = False
+        self.led_interface.cleanup()
+        self.led_interface.thread.join()

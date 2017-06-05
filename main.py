@@ -17,6 +17,4 @@ game_loop = GameLoopEntity(operation_mode)
 try:
     game_loop.run()
 except KeyboardInterrupt as e:
-    game_loop.led_interface.running = False
-    game_loop.led_interface.cleanup()
-    game_loop.led_interface.thread.join()
+    game_loop.close()

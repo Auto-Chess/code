@@ -41,11 +41,12 @@ class LedInterface():
 
     def reset(self):
         # Set all to low
-        for pin in self.lows:
-            GPIO.output(pin, 1)
+        if self.operation_mode == "hardware":
+            for pin in self.lows:
+                GPIO.output(pin, 1)
 
-        for pin in self.highs:
-            GPIO.output(pin, 0)
+            for pin in self.highs:
+                GPIO.output(pin, 0)
 
 
     def cleanup(self):
