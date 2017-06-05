@@ -3,6 +3,13 @@
 		psql-create psql-destroy psql-start psql-stop \
 		redis-create redis-destroy redis-start redis-stop
 
+# Sync
+sync:
+	scp * pi@10.0.0.102:/home/pi/app
+
+# SSH
+	ssh pi@10.0.0.102
+
 # Run
 # -- -- Run
 run:
