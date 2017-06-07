@@ -169,7 +169,7 @@ class WebServerInterface():
             'Authorization': self.chess_board_secret
         }
 
-        resp = requests.get(self.mk_api_url("/chess_board/{}".format(self.chess_board_id)))
+        resp = requests.get(self.mk_api_url("/chess_board/{}".format(self.chess_board_id)), headers=headers)
 
         # Check errors
         errs_dict = self.check_resp_errs(resp)
